@@ -1,0 +1,202 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f3f3ee;
+  --foreground: #2d2f33;
+  --bone: #f3f3ee;
+  --parchment: #e8e8de;
+  --surface: #fffcfc;
+  --graphite: #2d2f33;
+  --obsidian: #2a2a25;
+  --surface-darker: #1f1f1b;
+  --stone: #69695d;
+  --ash: #9c9c90;
+  --khaki: #cecebf;
+  --mist: #c2c2be;
+  --ember: #f43e01;
+  --ember-hover: #d83602;
+  --ember-active: #bf2f02;
+  --ember-soft: #fde4da;
+  --ember-deep: #9e2701;
+  --vapor: #e09afe;
+  --on-dark: #f3f3ee;
+  --on-dark-muted: #b8b8ae;
+}
+
+.dark {
+  --background: #1f1f1b;
+  --foreground: #f3f3ee;
+  --bone: #2a2a25;
+  --parchment: #1f1f1b;
+  --surface: #2d2f33;
+  --graphite: #f3f3ee;
+  --obsidian: #141412;
+  --stone: #cecebf;
+  --ash: #9c9c90;
+  --khaki: #3a3a34;
+  --mist: #4a4a44;
+  --on-dark: #f3f3ee;
+  --on-dark-muted: #b8b8ae;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-bone: var(--bone);
+  --color-parchment: var(--parchment);
+  --color-surface: var(--surface);
+  --color-graphite: var(--graphite);
+  --color-obsidian: var(--obsidian);
+  --color-surface-darker: var(--surface-darker);
+  --color-stone: var(--stone);
+  --color-ash: var(--ash);
+  --color-khaki: var(--khaki);
+  --color-mist: var(--mist);
+  --color-ember: var(--ember);
+  --color-ember-hover: var(--ember-hover);
+  --color-ember-active: var(--ember-active);
+  --color-ember-soft: var(--ember-soft);
+  --color-ember-deep: var(--ember-deep);
+  --color-vapor: var(--vapor);
+  --color-on-dark: var(--on-dark);
+  --color-on-dark-muted: var(--on-dark-muted);
+
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, SFMono-Regular, monospace;
+
+  --radius-tag: 5px;
+  --radius-card: 10px;
+  --radius-pill: 1000px;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+main,
+header,
+footer {
+  max-width: 100%;
+  min-width: 0;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Keep Leaflet overlays from being crushed by responsive media rules */
+.leaflet-container img,
+.leaflet-container svg,
+.leaflet-container canvas {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+h1,
+h2,
+h3,
+p {
+  overflow-wrap: break-word;
+}
+
+::selection {
+  background: var(--ember);
+  color: #fff;
+}
+
+.font-light-display {
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ember);
+}
+
+.grid-paper {
+  background-image:
+    linear-gradient(to right, rgba(45, 47, 51, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(45, 47, 51, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.leaflet-container,
+.traffic-leaflet,
+.traffic-leaflet .leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  z-index: 0;
+  background: #e8e8de;
+}
+
+.traffic-place-pin {
+  background: none !important;
+  border: none !important;
+}
+
+/* ≥1500px: page shells 80% (10% gutters); reading paragraphs 60% (20% gutters) */
+@media (min-width: 1500px) {
+  .max-w-\[1200px\] {
+    max-width: 80% !important;
+    width: 80%;
+    box-sizing: border-box;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Prose / FAQ reading columns: 60% page width → 20% left + 20% right */
+  .max-w-\[800px\] {
+    max-width: 60% !important;
+    width: 60%;
+    box-sizing: border-box;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Lead body paragraphs: 60% measure, never wider than parent */
+  p.max-w-xl,
+  p.max-w-2xl,
+  p.max-w-3xl,
+  .prose-site p,
+  .prose-site li {
+    width: min(60vw, 100%) !important;
+    max-width: min(60vw, 100%) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box;
+  }
+
+  /* Already inside a 60% column — fill it instead of nesting another measure */
+  .max-w-\[800px\] p,
+  .max-w-\[800px\] .prose-site p,
+  .max-w-\[800px\] .prose-site li {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}

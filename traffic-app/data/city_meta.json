@@ -1,0 +1,12 @@
+{
+  "name": "Thiruvananthapuram",
+  "region": "Kerala",
+  "center": [
+    8.5241,
+    76.9366
+  ],
+  "dist_m": 4500,
+  "nodes": 15375,
+  "edges": 35278,
+  "csv": "tvm_edges.csv"
+}

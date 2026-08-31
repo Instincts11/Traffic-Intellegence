@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# Next.js / build
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Caches & local runtime
+cache/
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE / tooling
+.idea/
+.vscode/
+.vercel
+.traffic-session.json
+
+# Uploads
+traffic-app/web/public/uploads/*
+!traffic-app/web/public/uploads/.gitkeep
+
+traffic-app/static/uploads/*
+!traffic-app/static/uploads/.gitkeep

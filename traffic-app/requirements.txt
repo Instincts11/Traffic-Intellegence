@@ -1,0 +1,10 @@
+flask
+gunicorn
+numpy
+pandas
+torch
+torch-geometric
+ultralytics
+osmnx
+geopandas
+stable-baselines3
