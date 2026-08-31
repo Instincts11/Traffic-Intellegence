@@ -200,3 +200,120 @@ p {
     margin-right: 0 !important;
   }
 }
+
+/*
+ * Larger type from 1922px up (paragraphs + nav + footer).
+ * Does not apply at 1921px and below.
+ */
+@media (min-width: 1922px) {
+  p.text-\[14px\] {
+    font-size: 18px !important;
+  }
+  p.text-\[15px\] {
+    font-size: 19px !important;
+  }
+  p.text-\[16px\] {
+    font-size: 20px !important;
+  }
+  p.text-\[17px\] {
+    font-size: 21px !important;
+  }
+  p.text-\[18px\] {
+    font-size: 22px !important;
+  }
+  p.text-\[20px\] {
+    font-size: 24px !important;
+  }
+
+  .prose-site,
+  .prose-site p {
+    font-size: 20px !important;
+    line-height: 1.75 !important;
+  }
+
+  /* Navbar */
+  header a.text-\[18px\] {
+    font-size: 22px !important;
+  }
+  header nav a.text-\[15px\] {
+    font-size: 18px !important;
+  }
+  header a.text-\[13px\],
+  header a.text-\[12px\],
+  header a.sm\:text-\[13px\] {
+    font-size: 15px !important;
+  }
+  header .text-\[12px\] {
+    font-size: 14px !important;
+  }
+
+  /* Footer */
+  footer p.text-\[18px\] {
+    font-size: 22px !important;
+  }
+  footer p.text-\[15px\],
+  footer a.text-\[15px\] {
+    font-size: 18px !important;
+  }
+  footer p.text-\[12px\],
+  footer .text-\[13px\],
+  footer .text-\[13px\] p {
+    font-size: 15px !important;
+  }
+}
+
+/* Ultra-wide 2560px+ — another step up */
+@media (min-width: 2560px) {
+  p.text-\[14px\] {
+    font-size: 20px !important;
+  }
+  p.text-\[15px\] {
+    font-size: 21px !important;
+  }
+  p.text-\[16px\] {
+    font-size: 22px !important;
+  }
+  p.text-\[17px\] {
+    font-size: 23px !important;
+  }
+  p.text-\[18px\] {
+    font-size: 24px !important;
+  }
+  p.text-\[20px\] {
+    font-size: 26px !important;
+  }
+
+  .prose-site,
+  .prose-site p {
+    font-size: 22px !important;
+    line-height: 1.8 !important;
+  }
+
+  header a.text-\[18px\] {
+    font-size: 24px !important;
+  }
+  header nav a.text-\[15px\] {
+    font-size: 20px !important;
+  }
+  header a.text-\[13px\],
+  header a.text-\[12px\],
+  header a.sm\:text-\[13px\] {
+    font-size: 16px !important;
+  }
+  header .text-\[12px\] {
+    font-size: 15px !important;
+  }
+
+  footer p.text-\[18px\] {
+    font-size: 24px !important;
+  }
+  footer p.text-\[15px\],
+  footer a.text-\[15px\] {
+    font-size: 20px !important;
+  }
+  footer p.text-\[12px\],
+  footer .text-\[13px\],
+  footer .text-\[13px\] p {
+    font-size: 16px !important;
+  }
+}
