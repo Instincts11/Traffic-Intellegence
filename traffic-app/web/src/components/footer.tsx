@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemePills } from "@/components/theme-toggle";
 
 const columns = [
   {
@@ -64,9 +65,12 @@ export function Footer() {
         ))}
       </div>
       <div className="border-t border-khaki">
-        <div className="mx-auto flex max-w-[1200px] flex-col gap-2 px-5 py-6 text-[13px] text-ash md:flex-row md:items-center md:justify-between md:px-8">
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-3 px-5 py-6 text-[13px] text-ash md:flex-row md:items-center md:justify-between md:px-8">
           <p>© {new Date().getFullYear()} Traffic. Thiruvananthapuram, Kerala · San Francisco.</p>
-          <p className="font-mono tracking-[0.08em] uppercase">Parchment · Ember · Obsidian</p>
+          <ThemePills className="max-[600px]:flex min-[601px]:hidden" />
+          <p className="hidden font-mono tracking-[0.08em] uppercase min-[601px]:block">
+            Parchment · Ember · Obsidian
+          </p>
         </div>
       </div>
     </footer>
