@@ -39,7 +39,7 @@ export function ThemeToggle() {
   );
 }
 
-/** Circular theme swatches — shown in footer on screens ≤600px */
+/** Single circular theme toggle — shown in footer on screens ≤600px */
 export function ThemePills({ className }: { className?: string }) {
   const [theme, setTheme] = useState<Theme>("parchment");
 
@@ -50,43 +50,26 @@ export function ThemePills({ className }: { className?: string }) {
     document.documentElement.classList.toggle("dark", next === "obsidian");
   }, []);
 
-  function select(next: Theme) {
+  function toggle() {
+    const next: Theme = theme === "obsidian" ? "parchment" : "obsidian";
     setTheme(next);
     applyTheme(next);
   }
 
+  const isObsidian = theme === "obsidian";
+
   return (
-    <div
-      className={cn("flex items-center justify-center gap-3", className)}
-      role="group"
-      aria-label="Theme"
-    >
+    <div className={cn("flex items-center justify-center", className)}>
       <button
         type="button"
-        onClick={() => select("parchment")}
-        aria-label="Parchment theme"
-        aria-pressed={theme === "parchment"}
-        title="Parchment"
+        onClick={toggle}
+        aria-label={isObsidian ? "Switch to parchment theme" : "Switch to obsidian theme"}
+        title={isObsidian ? "Obsidian" : "Parchment"}
         className={cn(
-          "h-8 w-8 shrink-0 rounded-full border-2 transition-all",
-          "bg-[#f3f3ee]",
-          theme === "parchment"
-            ? "border-ember scale-110 shadow-[0_0_0_3px_rgba(244,62,1,0.25)]"
-            : "border-khaki opacity-70 hover:opacity-100 hover:border-graphite",
-        )}
-      />
-      <button
-        type="button"
-        onClick={() => select("obsidian")}
-        aria-label="Obsidian theme"
-        aria-pressed={theme === "obsidian"}
-        title="Obsidian"
-        className={cn(
-          "h-8 w-8 shrink-0 rounded-full border-2 transition-all",
-          "bg-[#2a2a25]",
-          theme === "obsidian"
-            ? "border-ember scale-110 shadow-[0_0_0_3px_rgba(244,62,1,0.25)]"
-            : "border-khaki opacity-70 hover:opacity-100 hover:border-mist",
+          "h-8 w-8 shrink-0 rounded-full border-2 transition-colors",
+          isObsidian
+            ? "border-mist bg-[#2a2a25]"
+            : "border-khaki bg-[#f3f3ee]",
         )}
       />
     </div>
