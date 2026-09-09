@@ -15,7 +15,7 @@ export function Nav() {
     <header className="sticky top-0 z-50 max-w-full overflow-x-clip border-b border-khaki/70 bg-bone/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[1200px] min-w-0 items-center justify-between gap-2 px-5 md:px-8">
         <Link href="/" className="shrink-0 text-[18px] font-medium tracking-[-0.03em] text-foreground">
-          Traffic
+          Traffipi
         </Link>
 
         <nav className="hidden items-center gap-7 lg:flex">
