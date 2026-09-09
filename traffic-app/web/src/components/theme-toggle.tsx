@@ -39,7 +39,7 @@ export function ThemeToggle() {
   );
 }
 
-/** Dual theme pills — shown in footer on screens ≤600px */
+/** Circular theme swatches — shown in footer on screens ≤600px */
 export function ThemePills({ className }: { className?: string }) {
   const [theme, setTheme] = useState<Theme>("parchment");
 
@@ -57,39 +57,38 @@ export function ThemePills({ className }: { className?: string }) {
 
   return (
     <div
-      className={cn(
-        "flex items-center justify-center gap-2",
-        className,
-      )}
+      className={cn("flex items-center justify-center gap-3", className)}
       role="group"
       aria-label="Theme"
     >
       <button
         type="button"
         onClick={() => select("parchment")}
+        aria-label="Parchment theme"
         aria-pressed={theme === "parchment"}
+        title="Parchment"
         className={cn(
-          "rounded-pill border px-4 py-2 font-mono text-[11px] tracking-[0.08em] uppercase transition-colors",
+          "h-8 w-8 shrink-0 rounded-full border-2 transition-all",
+          "bg-[#f3f3ee]",
           theme === "parchment"
-            ? "border-graphite bg-[#2a2a25] text-[#f3f3ee]"
-            : "border-khaki bg-transparent text-stone hover:border-graphite",
+            ? "border-ember scale-110 shadow-[0_0_0_3px_rgba(244,62,1,0.25)]"
+            : "border-khaki opacity-70 hover:opacity-100 hover:border-graphite",
         )}
-      >
-        Parchment
-      </button>
+      />
       <button
         type="button"
         onClick={() => select("obsidian")}
+        aria-label="Obsidian theme"
         aria-pressed={theme === "obsidian"}
+        title="Obsidian"
         className={cn(
-          "rounded-pill border px-4 py-2 font-mono text-[11px] tracking-[0.08em] uppercase transition-colors",
+          "h-8 w-8 shrink-0 rounded-full border-2 transition-all",
+          "bg-[#2a2a25]",
           theme === "obsidian"
-            ? "border-graphite bg-[#2a2a25] text-[#f3f3ee]"
-            : "border-khaki bg-transparent text-stone hover:border-graphite",
+            ? "border-ember scale-110 shadow-[0_0_0_3px_rgba(244,62,1,0.25)]"
+            : "border-khaki opacity-70 hover:opacity-100 hover:border-mist",
         )}
-      >
-        Obsidian
-      </button>
+      />
     </div>
   );
 }
