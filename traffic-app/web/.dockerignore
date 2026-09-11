@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+.traffic-session.json
+public/uploads/*
+!public/uploads/.gitkeep
+Dockerfile
+.dockerignore
+npm-debug.log*
+.env*

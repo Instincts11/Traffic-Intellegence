@@ -42,3 +42,11 @@ traffic-app/web/public/uploads/*
 
 traffic-app/static/uploads/*
 !traffic-app/static/uploads/.gitkeep
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfvars
+!terraform/terraform.tfvars.example
+terraform/.terraform.lock.hcl

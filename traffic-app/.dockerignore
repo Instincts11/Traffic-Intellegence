@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+*.log
+cache/
+.git
+.gitignore
+web/node_modules
+web/.next
+**/__pycache__
+static/uploads/*
+!static/uploads/.gitkeep
