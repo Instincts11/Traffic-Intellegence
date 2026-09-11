@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffipi-web
+  namespace: traffipi
+  labels:
+    app: traffipi-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traffipi-web
+  template:
+    metadata:
+      labels:
+        app: traffipi-web
+    spec:
+      containers:
+        - name: web
+          image: traffic-web:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: FLASK_URL
+              value: http://api:5000
+            - name: PORT
+              value: "3000"
+            - name: HOSTNAME
+              value: "0.0.0.0"
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: traffipi
+  labels:
+    app: traffipi-web
+spec:
+  type: NodePort
+  selector:
+    app: traffipi-web
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      nodePort: 30080
