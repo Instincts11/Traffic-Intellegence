@@ -241,8 +241,12 @@ export async function searchPlacesOsm(
       params.set("lon", String(origin.lon));
     }
     const res = await fetch(`/api/places?${params.toString()}`);
-    const data = await res.json();
-    if (!res.ok || data.error) {
+    const text = await res.text();
+    if (!res.ok || !text.trimStart().startsWith("{")) {
+      return filterPlaces(q, origin, limit);
+    }
+    const data = JSON.parse(text) as { error?: string; places?: Place[] };
+    if (data.error) {
       return filterPlaces(q, origin, limit);
     }
     const rows = (data.places || []) as Place[];
@@ -270,8 +274,10 @@ export async function snapPlace(place: Place): Promise<Place> {
       lon: String(place.lon),
     });
     const res = await fetch(`/api/nearest?${params.toString()}`);
-    const data = await res.json();
-    const origin = data.origin as Place | undefined;
+    const text = await res.text();
+    if (!res.ok || !text.trimStart().startsWith("{")) return place;
+    const data = JSON.parse(text) as { origin?: Place };
+    const origin = data.origin;
     if (res.ok && origin) {
       return {
         ...place,

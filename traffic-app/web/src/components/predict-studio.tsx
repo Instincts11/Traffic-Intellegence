@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatError } from "@/lib/format-error";
+import { fetchJson } from "@/lib/api";
+import { demoLocations, demoPpoRoute } from "@/lib/demo-predict";
 import { PlacePair } from "@/components/place-pair";
 import { TVM_PLACES, type Place } from "@/lib/places";
 
@@ -111,7 +112,7 @@ export function PredictStudio() {
     }
     setBusy("hybrid");
     try {
-      const res = await fetch("/api/hybrid_predict", {
+      const data = await fetchJson<HybridResponse>("/api/hybrid_predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -120,10 +121,8 @@ export function PredictStudio() {
           scenario,
         }),
       });
-      const data = (await res.json()) as HybridResponse;
       if (data.error) {
-        setHybridMeta("❌ Error: " + data.error);
-        setLocations([]);
+        applyHybridDemo("studio forecast — live API unavailable");
         return;
       }
       const next =
@@ -134,9 +133,8 @@ export function PredictStudio() {
       setHybridMeta(
         `Hybrid GAT–LSTM · ${next.length} places · ${data.scenario} · ${data.date} ${data.time}`,
       );
-    } catch (err) {
-      setHybridMeta("❌ Error: " + formatError(err));
-      setLocations([]);
+    } catch {
+      applyHybridDemo("studio forecast — live API unavailable");
     } finally {
       setBusy(null);
     }
@@ -157,7 +155,7 @@ export function PredictStudio() {
     }
     setBusy("ppo");
     try {
-      const res = await fetch("/api/ppo_route", {
+      const data = await fetchJson<PpoResponse>("/api/ppo_route", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -174,39 +172,66 @@ export function PredictStudio() {
           scenario,
         }),
       });
-      const data = (await res.json()) as PpoResponse;
       if (data.error) {
-        setPpoText("❌ Error: " + data.error);
+        applyPpoDemo(start, end);
         return;
       }
-      const startLoc = locations.find((l) => l.id === start.id);
-      const endLoc = locations.find((l) => l.id === end.id);
-      setPpoText(
-        [
-          "PPO route recommendation",
-          "",
-          `From  : ${data.start_name || start.name} (${start.area})`,
-          `To    : ${data.end_name || end.name} (${end.area})`,
-          `When  : ${data.date} ${data.time} · ${data.scenario}`,
-          "",
-          startLoc?.speed != null
-            ? `Start speed : ${Number(startLoc.speed).toFixed(1)} km/h`
-            : null,
-          endLoc?.speed != null
-            ? `End speed   : ${Number(endLoc.speed).toFixed(1)} km/h`
-            : null,
-          `Best speed  : ${Number(data.predicted_speed).toFixed(1)} km/h`,
-          "",
-          `Best road between ${start.name} and ${end.name} based on predicted speed.`,
-        ]
-          .filter(Boolean)
-          .join("\n"),
-      );
-    } catch (err) {
-      setPpoText("❌ Error: " + formatError(err));
+      setPpoText(formatPpo(data, start, end));
+    } catch {
+      applyPpoDemo(start, end);
     } finally {
       setBusy(null);
     }
+  }
+
+  function applyHybridDemo(note: string) {
+    const next = demoLocations(date, time, scenario);
+    setLocations(next);
+    setHybridMeta(
+      `Hybrid GAT–LSTM · ${next.length} places · ${scenario} · ${date} ${time} · ${note}`,
+    );
+  }
+
+  function applyPpoDemo(from: Place, to: Place) {
+    const data = demoPpoRoute({
+      start: from,
+      end: to,
+      date,
+      time,
+      scenario,
+      locations,
+    });
+    setPpoText(formatPpo(data, from, to, true));
+  }
+
+  function formatPpo(
+    data: PpoResponse,
+    from: Place,
+    to: Place,
+    studio = false,
+  ) {
+    const startLoc = locations.find((l) => l.id === from.id);
+    const endLoc = locations.find((l) => l.id === to.id);
+    return [
+      studio ? "PPO route recommendation (studio forecast)" : "PPO route recommendation",
+      "",
+      `From  : ${data.start_name || from.name} (${from.area})`,
+      `To    : ${data.end_name || to.name} (${to.area})`,
+      `When  : ${data.date} ${data.time} · ${data.scenario}`,
+      "",
+      startLoc?.speed != null
+        ? `Start speed : ${Number(startLoc.speed).toFixed(1)} km/h`
+        : null,
+      endLoc?.speed != null
+        ? `End speed   : ${Number(endLoc.speed).toFixed(1)} km/h`
+        : null,
+      `Best speed  : ${Number(data.predicted_speed).toFixed(1)} km/h`,
+      "",
+      data.note ||
+        `Best road between ${from.name} and ${to.name} based on predicted speed.`,
+    ]
+      .filter(Boolean)
+      .join("\n");
   }
 
   return (
