@@ -16,6 +16,7 @@ import { PlacePair } from "@/components/place-pair";
 
 import type { Place } from "@/lib/places";
 import { fallbackNetwork, fallbackRouteMap } from "@/lib/demo-map";
+import { loadCityRoads } from "@/lib/osm-city-roads";
 
 
 
@@ -176,15 +177,21 @@ export function MapStudio() {
     roads: [],
 
   });
+  const [cityRoads, setCityRoads] = useState<MapRoad[]>([]);
 
 
 
   async function loadBase() {
     try {
+      setStatus(`Loading ${city.name} OSM roads…`);
       const data = fallbackNetwork();
       setPayload((prev) => ({ ...prev, ...data, route: prev.route }));
+      const roads = await loadCityRoads(scenario);
+      setCityRoads(roads);
       setStatus(
-        `✅ ${city.name} OSM basemap. Select start & end, then generate a driving route.`,
+        roads.length
+          ? `✅ ${city.name} · ${roads.length} major roads from OpenStreetMap. Select start & end, then generate.`
+          : `✅ ${city.name} OSM basemap. Select start & end, then generate a driving route.`,
       );
     } catch (err) {
       setStatus("❌ Error: " + formatError(err));
@@ -231,7 +238,7 @@ export function MapStudio() {
 
     void loadBase();
 
-  }, []);
+  }, [scenario]);
 
 
 
@@ -482,13 +489,13 @@ export function MapStudio() {
 
           <h3 className="mt-1 text-[22px] font-light tracking-[-0.02em]">
 
-            {city.name} on OpenStreetMap
+            {city.name} · full urban extent
 
           </h3>
 
           <p className="mt-2 text-[14px] text-stone">
 
-            Green pin is start, black pin is end. After you generate, the colored line is the driving route on real roads — not a straight cut across the map. Grey dashed is crow-flies only.
+            The view covers Kovalam through Kazhakkoottam. Colored lines are major OSM roads (green ≥ 25 km/h, orange 18–25, red slower). Green pin is start, black pin is end. Grey dashed is crow-flies only.
 
           </p>
 
@@ -498,11 +505,11 @@ export function MapStudio() {
 
               mapKey="full-city"
 
-              roads={[]}
+              roads={cityRoads}
 
-              center={payload.center || city.center}
+              center={city.center}
 
-              zoom={payload.zoom || city.zoom}
+              zoom={city.zoom}
 
               bestIndex={-1}
 
@@ -512,7 +519,9 @@ export function MapStudio() {
 
               pathOverlays={pathOverlays}
 
-              height={480}
+              fitToCity
+
+              height={620}
 
             />
 

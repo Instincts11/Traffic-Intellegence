@@ -45,6 +45,7 @@ export function TrafficLeaflet({
   pathOnly = false,
   height = 480,
   fitToRoute = false,
+  fitToCity = false,
 }: {
   mapKey: string;
   roads: MapRoad[];
@@ -60,6 +61,7 @@ export function TrafficLeaflet({
   pathOnly?: boolean;
   height?: number;
   fitToRoute?: boolean;
+  fitToCity?: boolean;
 }) {
   const el = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -84,7 +86,9 @@ export function TrafficLeaflet({
       zoom,
       zoomControl: true,
       scrollWheelZoom: true,
-      preferCanvas: false,
+      preferCanvas: true,
+      minZoom: 10,
+      maxZoom: 18,
     };
 
     map = L.map(node, options);
@@ -235,7 +239,15 @@ export function TrafficLeaflet({
         ...overlays.flatMap((o) => o.path),
       ];
 
-      if (fitToRoute && (markers.length >= 2 || fitLines.length >= 2)) {
+      if (fitToCity) {
+        map.fitBounds(
+          [
+            [city.bounds.south, city.bounds.west],
+            [city.bounds.north, city.bounds.east],
+          ],
+          { animate: false, padding: [16, 16], maxZoom: 13 },
+        );
+      } else if (fitToRoute && (markers.length >= 2 || fitLines.length >= 2)) {
         let bounds: LatLngBounds | null = null;
         if (markers.length >= 2) {
           bounds = L.latLngBounds(
@@ -293,6 +305,7 @@ export function TrafficLeaflet({
     pathOverlays,
     pathOnly,
     fitToRoute,
+    fitToCity,
   ]);
 
   return (
