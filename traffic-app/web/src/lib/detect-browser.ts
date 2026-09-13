@@ -1,6 +1,6 @@
 const INPUT_SIZE = 640;
-const CONF_THRES = 0.2;
-const IOU_THRES = 0.45;
+const CONF_THRES = 0.12;
+const IOU_THRES = 0.5;
 const ORT_VERSION = "1.21.0";
 const ORT_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
 const MODEL_URL = "/models/yolov8n.onnx";
@@ -97,9 +97,15 @@ function fileToImage(file: File) {
   });
 }
 
-function letterbox(img: HTMLImageElement) {
-  const iw = img.naturalWidth || img.width;
-  const ih = img.naturalHeight || img.height;
+function sourceSize(src: HTMLImageElement | HTMLCanvasElement) {
+  if (src instanceof HTMLImageElement) {
+    return { w: src.naturalWidth || src.width, h: src.naturalHeight || src.height };
+  }
+  return { w: src.width, h: src.height };
+}
+
+function letterbox(img: HTMLImageElement | HTMLCanvasElement) {
+  const { w: iw, h: ih } = sourceSize(img);
   const scale = Math.min(INPUT_SIZE / iw, INPUT_SIZE / ih);
   const nw = Math.round(iw * scale);
   const nh = Math.round(ih * scale);
@@ -212,7 +218,65 @@ function parseOutput(
     });
   }
 
-  return nms(hits);
+  return hits;
+}
+
+function cropCanvas(
+  img: HTMLImageElement,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) {
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(w));
+  canvas.height = Math.max(1, Math.round(h));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not crop the image.");
+  ctx.drawImage(img, x, y, w, h, 0, 0, canvas.width, canvas.height);
+  return canvas;
+}
+
+function detectionWindows(w: number, h: number) {
+  const windows = [{ x: 0, y: 0, w, h }];
+  const cw = Math.round(w * 0.6);
+  const ch = Math.round(h * 0.6);
+  for (const y of [0, h - ch]) {
+    for (const x of [0, w - cw]) {
+      windows.push({ x, y, w: cw, h: ch });
+    }
+  }
+  windows.push({
+    x: Math.round(w * 0.15),
+    y: Math.round(h * 0.4),
+    w: Math.round(w * 0.7),
+    h: Math.round(h * 0.6),
+  });
+  return windows;
+}
+
+async function inferWindow(
+  session: OrtSession,
+  img: HTMLImageElement,
+  win: { x: number; y: number; w: number; h: number },
+) {
+  const ort = window.ort;
+  if (!ort) throw new Error("ONNX Runtime failed to load.");
+  const src =
+    win.x === 0 && win.y === 0 && win.w === (img.naturalWidth || img.width) &&
+    win.h === (img.naturalHeight || img.height)
+      ? img
+      : cropCanvas(img, win.x, win.y, win.w, win.h);
+  const prepared = letterbox(src);
+  const input = new ort.Tensor("float32", prepared.float, [1, 3, INPUT_SIZE, INPUT_SIZE]);
+  const feeds: Record<string, unknown> = {};
+  feeds[session.inputNames[0] || "images"] = input;
+  const out = await session.run(feeds);
+  const hits = parseOutput(out[session.outputNames[0]], prepared);
+  return hits.map((hit) => ({
+    ...hit,
+    bbox: [hit.bbox[0] + win.x, hit.bbox[1] + win.y, hit.bbox[2], hit.bbox[3]] as Detection["bbox"],
+  }));
 }
 
 function drawDetections(img: HTMLImageElement, hits: Detection[]) {
@@ -253,16 +317,14 @@ export type BrowserDetectResult = {
 
 export async function detectVehiclesInBrowser(file: File): Promise<BrowserDetectResult> {
   const [session, img] = await Promise.all([getSession(), fileToImage(file)]);
-  const prepared = letterbox(img);
-  const ort = window.ort;
-  if (!ort) throw new Error("ONNX Runtime failed to load.");
-
-  const input = new ort.Tensor("float32", prepared.float, [1, 3, INPUT_SIZE, INPUT_SIZE]);
-  const feeds: Record<string, unknown> = {};
-  feeds[session.inputNames[0] || "images"] = input;
-  const out = await session.run(feeds);
-  const tensor = out[session.outputNames[0]];
-  const hits = parseOutput(tensor, prepared);
+  const iw = img.naturalWidth || img.width;
+  const ih = img.naturalHeight || img.height;
+  const all: Detection[] = [];
+  for (const win of detectionWindows(iw, ih)) {
+    const hits = await inferWindow(session, img, win);
+    all.push(...hits);
+  }
+  const hits = nms(all);
 
   const by_class: Record<string, number> = {};
   hits.forEach((h) => {
