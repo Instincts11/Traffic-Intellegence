@@ -59,7 +59,7 @@ export function DetectStudio() {
     }
     setBusy(true);
     setDetectedUrl("");
-    setResult("Running YOLOv8n on the full frame and close-up tiles…");
+    setResult("Running YOLOv8n on the full image…");
     try {
       const local = await detectVehiclesInBrowser(file);
       setDetectedUrl(local.annotated_image_url);
