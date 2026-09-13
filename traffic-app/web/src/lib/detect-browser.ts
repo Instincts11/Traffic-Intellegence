@@ -1,6 +1,8 @@
 const INPUT_SIZE = 640;
-const CONF_THRES = 0.08;
-const IOU_THRES = 0.5;
+const CONF_THRES = 0.32;
+const CLOSEUP_CONF = 0.28;
+const IOU_THRES = 0.35;
+const CONTAIN_THRES = 0.5;
 const ORT_VERSION = "1.21.0";
 const ORT_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
 const MODEL_URL = "/models/yolov8n.onnx";
@@ -15,8 +17,6 @@ const COCO_NAMES = [
   "train",
   "truck",
 ];
-
-const VEHICLE_CLASS_IDS = new Set([1, 2, 3, 5, 7]);
 
 type Detection = {
   bbox: [number, number, number, number];
@@ -150,18 +150,60 @@ function iou(a: Detection, b: Detection) {
   return union <= 0 ? 0 : inter / union;
 }
 
+function iomin(a: Detection, b: Detection) {
+  const ax2 = a.bbox[0] + a.bbox[2];
+  const ay2 = a.bbox[1] + a.bbox[3];
+  const bx2 = b.bbox[0] + b.bbox[2];
+  const by2 = b.bbox[1] + b.bbox[3];
+  const ix = Math.max(0, Math.min(ax2, bx2) - Math.max(a.bbox[0], b.bbox[0]));
+  const iy = Math.max(0, Math.min(ay2, by2) - Math.max(a.bbox[1], b.bbox[1]));
+  const inter = ix * iy;
+  const minArea = Math.min(a.bbox[2] * a.bbox[3], b.bbox[2] * b.bbox[3]);
+  return minArea <= 0 ? 0 : inter / minArea;
+}
+
 function nms(hits: Detection[]) {
   const sorted = [...hits].sort((a, b) => b.score - a.score);
   const keep: Detection[] = [];
   for (const hit of sorted) {
-    if (keep.every((k) => iou(hit, k) < IOU_THRES)) keep.push(hit);
+    if (
+      keep.every(
+        (k) => iou(hit, k) < IOU_THRES && iomin(hit, k) < CONTAIN_THRES,
+      )
+    ) {
+      keep.push(hit);
+    }
   }
   return keep;
+}
+
+function pickVehicle(
+  at: (ch: number) => number,
+  numClasses: number,
+  minScore: number,
+): { cls: number; score: number } | null {
+  const scoreOf = (id: number) => (id < numClasses ? at(4 + id) : 0);
+  const bicycle = scoreOf(1);
+  const car = scoreOf(2);
+  const motorcycle = scoreOf(3);
+  const bus = scoreOf(5);
+  const truck = scoreOf(7);
+  const fourWheel = Math.max(car, truck, bus);
+
+  if (fourWheel >= minScore) {
+    if (bus >= 0.72 && bus >= car + 0.28) return { cls: 5, score: bus };
+    if (truck >= 0.78 && truck >= car + 0.3) return { cls: 7, score: truck };
+    return { cls: 2, score: fourWheel };
+  }
+  if (motorcycle >= Math.max(0.42, minScore)) return { cls: 3, score: motorcycle };
+  if (bicycle >= Math.max(0.42, minScore)) return { cls: 1, score: bicycle };
+  return null;
 }
 
 function parseOutput(
   tensor: OrtTensor,
   meta: { scale: number; dx: number; dy: number; iw: number; ih: number },
+  minScore: number,
 ) {
   const dims = tensor.dims;
   const raw = tensor.data;
@@ -187,22 +229,14 @@ function parseOutput(
 
   const numClasses = channels - 4;
   const hits: Detection[] = [];
+  const minSide = Math.max(8, Math.min(meta.iw, meta.ih) * 0.03);
 
   const at = (ch: number, i: number) =>
     planar ? data[ch * anchors + i] : data[i * channels + ch];
 
   for (let i = 0; i < anchors; i++) {
-    let best = 0;
-    let bestCls = 2;
-    for (const c of VEHICLE_CLASS_IDS) {
-      if (c >= numClasses) continue;
-      const s = at(4 + c, i);
-      if (s > best) {
-        best = s;
-        bestCls = c;
-      }
-    }
-    if (best < CONF_THRES) continue;
+    const picked = pickVehicle((ch) => at(ch, i), numClasses, minScore);
+    if (!picked) continue;
 
     const cx = at(0, i);
     const cy = at(1, i);
@@ -216,12 +250,14 @@ function parseOutput(
     const by = Math.max(0, Math.min(meta.ih, y1));
     const bw = Math.max(0, Math.min(meta.iw, x2) - bx);
     const bh = Math.max(0, Math.min(meta.ih, y2) - by);
-    if (bw < 4 || bh < 4) continue;
+    if (bw < minSide || bh < minSide) continue;
+    const ratio = bw / bh;
+    if (ratio < 0.35 || ratio > 3.2) continue;
 
     hits.push({
       bbox: [bx, by, bw, bh],
-      class: COCO_NAMES[bestCls] || `class ${bestCls}`,
-      score: best,
+      class: COCO_NAMES[picked.cls] || "car",
+      score: picked.score,
     });
   }
 
@@ -247,28 +283,32 @@ function cropCanvas(
 }
 
 function detectionWindows(w: number, h: number) {
-  const windows: { x: number; y: number; w: number; h: number; cover: boolean }[] = [
-    { x: 0, y: 0, w, h, cover: false },
+  const bottom = Math.round(h * 0.42);
+  return [
+    { x: 0, y: 0, w, h, cover: false, minScore: CONF_THRES },
+    {
+      x: 0,
+      y: h - bottom,
+      w: Math.round(w * 0.58),
+      h: bottom,
+      cover: true,
+      minScore: CLOSEUP_CONF,
+    },
+    {
+      x: Math.round(w * 0.12),
+      y: Math.round(h * 0.55),
+      w: Math.round(w * 0.4),
+      h: Math.round(h * 0.45),
+      cover: true,
+      minScore: CLOSEUP_CONF,
+    },
   ];
-  const cw = Math.round(w * 0.55);
-  const ch = Math.round(h * 0.55);
-  for (const y of [0, h - ch]) {
-    for (const x of [0, w - cw]) {
-      windows.push({ x, y, w: cw, h: ch, cover: true });
-    }
-  }
-  windows.push(
-    { x: Math.round(w * 0.08), y: Math.round(h * 0.52), w: Math.round(w * 0.5), h: Math.round(h * 0.48), cover: true },
-    { x: Math.round(w * 0.18), y: Math.round(h * 0.58), w: Math.round(w * 0.42), h: Math.round(h * 0.42), cover: true },
-    { x: Math.round(w * 0.22), y: Math.round(h * 0.62), w: Math.round(w * 0.36), h: Math.round(h * 0.38), cover: true },
-  );
-  return windows;
 }
 
 async function inferWindow(
   session: OrtSession,
   img: HTMLImageElement,
-  win: { x: number; y: number; w: number; h: number; cover: boolean },
+  win: { x: number; y: number; w: number; h: number; cover: boolean; minScore: number },
 ) {
   const ort = window.ort;
   if (!ort) throw new Error("ONNX Runtime failed to load.");
@@ -281,7 +321,7 @@ async function inferWindow(
   const feeds: Record<string, unknown> = {};
   feeds[session.inputNames[0] || "images"] = input;
   const out = await session.run(feeds);
-  const hits = parseOutput(out[session.outputNames[0]], prepared);
+  const hits = parseOutput(out[session.outputNames[0]], prepared, win.minScore);
   const iw = img.naturalWidth || img.width;
   const ih = img.naturalHeight || img.height;
   return hits.map((hit) => {
@@ -338,7 +378,10 @@ export async function detectVehiclesInBrowser(file: File): Promise<BrowserDetect
     const hits = await inferWindow(session, img, win);
     all.push(...hits);
   }
-  const hits = nms(all);
+  const hits = nms(all).filter((h) => {
+    const area = h.bbox[2] * h.bbox[3];
+    return h.score >= CLOSEUP_CONF && area >= iw * ih * 0.0035;
+  });
 
   const by_class: Record<string, number> = {};
   hits.forEach((h) => {
