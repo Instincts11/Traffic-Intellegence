@@ -1,5 +1,6 @@
 import { city } from "@/lib/city";
 import { generateDemoSpeeds, placeSpeedIndex } from "@/lib/demo-predict";
+import { fallbackNetwork, fallbackRouteMap } from "@/lib/demo-map";
 import {
   TVM_PLACES,
   filterPlaces,
@@ -179,7 +180,11 @@ export function fallbackInfluence(input: {
   };
 }
 
-export function fallbackForApi(apiPath: string, search: URLSearchParams) {
+export function fallbackForApi(
+  apiPath: string,
+  search: URLSearchParams,
+  extra?: Record<string, unknown> | null,
+) {
   if (apiPath === "/api/places") {
     return fallbackPlacesSearch(
       search.get("q") || "",
@@ -211,6 +216,31 @@ export function fallbackForApi(apiPath: string, search: URLSearchParams) {
       place: search.get("place"),
     });
   }
+  if (apiPath === "/api/network") {
+    return fallbackNetwork();
+  }
+  if (apiPath === "/api/route_map_full") {
+    const body = extra || {};
+    const startLat = Number(body.start_lat);
+    const startLon = Number(body.start_lon);
+    const endLat = Number(body.end_lat);
+    const endLon = Number(body.end_lon);
+    if (![startLat, startLon, endLat, endLon].every(Number.isFinite)) {
+      return { error: "start_lat, start_lon, end_lat, and end_lon are required." };
+    }
+    return fallbackRouteMap({
+      startLat,
+      startLon,
+      endLat,
+      endLon,
+      startName: body.start_name != null ? String(body.start_name) : undefined,
+      endName: body.end_name != null ? String(body.end_name) : undefined,
+      scenario: body.scenario != null ? String(body.scenario) : undefined,
+      routeMode: body.route_mode != null ? String(body.route_mode) : undefined,
+      date: body.date != null ? String(body.date) : undefined,
+      time: body.time != null ? String(body.time) : undefined,
+    });
+  }
   return null;
 }
 
@@ -219,6 +249,8 @@ export function isStudioApi(apiPath: string) {
     apiPath === "/api/places" ||
     apiPath === "/api/places/catalog" ||
     apiPath === "/api/nearest" ||
-    apiPath === "/api/influence"
+    apiPath === "/api/influence" ||
+    apiPath === "/api/network" ||
+    apiPath === "/api/route_map_full"
   );
 }

@@ -15,6 +15,7 @@ import type { MapRoad, PathOverlay } from "@/components/traffic-leaflet";
 import { PlacePair } from "@/components/place-pair";
 
 import type { Place } from "@/lib/places";
+import { fallbackNetwork, fallbackRouteMap } from "@/lib/demo-map";
 
 
 
@@ -179,115 +180,48 @@ export function MapStudio() {
 
 
   async function loadBase() {
-
     try {
-
-      const res = await fetch("/api/network");
-
-      const data = (await res.json()) as Payload;
-
-      if (data.error) throw new Error(data.error);
-
+      const data = fallbackNetwork();
       setPayload((prev) => ({ ...prev, ...data, route: prev.route }));
-
       setStatus(
-
-        `✅ ${city.name} OSM graph · ${data.edges ?? data.roads?.length ?? 0} edges. Select start & end, then generate.`,
-
+        `✅ ${city.name} studio graph · ${data.edges ?? data.roads?.length ?? 0} corridors. Select start & end, then generate.`,
       );
-
     } catch (err) {
-
       setStatus("❌ Error: " + formatError(err));
-
     }
-
   }
 
-
-
   async function generate() {
-
     if (!start || !end) {
-
       alert("Choose a start place and an end place first.");
-
       return;
-
     }
-
     setBusy(true);
-
     try {
-
-      const res = await fetch("/api/route_map_full", {
-
-        method: "POST",
-
-        headers: { "Content-Type": "application/json" },
-
-        body: JSON.stringify({
-
-          start_lat: start.lat,
-
-          start_lon: start.lon,
-
-          end_lat: end.lat,
-
-          end_lon: end.lon,
-
-          start_name: start.name,
-
-          end_name: end.name,
-
-          scenario,
-
-          route_mode: routeMode,
-
-          time: "10:00",
-
-        }),
-
+      const data = fallbackRouteMap({
+        startLat: start.lat,
+        startLon: start.lon,
+        endLat: end.lat,
+        endLon: end.lon,
+        startName: start.name,
+        endName: end.name,
+        scenario,
+        routeMode,
+        time: "10:00",
       });
-
-      const data = (await res.json()) as Payload;
-
-      if (data.error) {
-
-        alert("Error: " + data.error);
-
-        setStatus("❌ Error: " + data.error);
-
-        return;
-
-      }
-
       setPayload(data);
-
       const route = data.route;
-
       setStatus(
-
         route
-
           ? `✅ ${route.start_name} → ${route.end_name} · ${route.scenario ?? scenario} · ${route.distance_km ?? "—"} km (${route.eta_min ?? "—"} min) · direct ${route.direct_km ?? "—"} km`
-
           : `✅ ${city.name} traffic map generated.`,
-
       );
-
     } catch (err) {
-
       alert("Error: " + formatError(err));
-
       setStatus("❌ Error: " + formatError(err));
-
     } finally {
-
       setBusy(false);
-
     }
-
   }
 
 
