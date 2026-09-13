@@ -1,9 +1,45 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { fetchJson } from "@/lib/api";
+import { detectVehiclesInBrowser } from "@/lib/detect-browser";
 import { formatError } from "@/lib/format-error";
 import { PlacePair } from "@/components/place-pair";
 import type { Place } from "@/lib/places";
+
+type YoloResponse = {
+  error?: string;
+  vehicle_count?: number;
+  annotated_image_url?: string;
+};
+
+function formatResult(
+  count: number,
+  place: Place | null,
+  source: "api" | "browser",
+  byClass?: Record<string, number>,
+) {
+  const lines = [
+    source === "api"
+      ? "✅ YOLOv8 Detection Complete"
+      : "✅ Vehicle detection complete (on-device)",
+    "",
+    `Detected vehicles: ${count}`,
+  ];
+  if (byClass && Object.keys(byClass).length) {
+    lines.push(
+      Object.entries(byClass)
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, n]) => `  ${name}: ${n}`)
+        .join("\n"),
+    );
+  }
+  if (place) {
+    lines.push(`Location: ${place.name} (${place.area})`);
+  }
+  lines.push("", "Showing annotated image on the right.");
+  return lines.filter(Boolean).join("\n");
+}
 
 export function DetectStudio() {
   const [file, setFile] = useState<File | null>(null);
@@ -27,37 +63,32 @@ export function DetectStudio() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    setResult("Uploading image and running YOLOv8 detection...");
     if (!file) {
       setResult("❌ Please choose an image first.");
       return;
     }
     setBusy(true);
-    const formData = new FormData();
-    formData.append("image", file);
+    setDetectedUrl("");
+    setResult("Uploading image and running vehicle detection…");
     try {
-      const res = await fetch("/api/yolo_detect", {
+      const formData = new FormData();
+      formData.append("image", file);
+      const data = await fetchJson<YoloResponse>("/api/yolo_detect", {
         method: "POST",
         body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        throw new Error(data.error || `HTTP ${res.status}`);
+      }, 20000);
+      const count = Number(data.vehicle_count || 0);
+      if (data.annotated_image_url) setDetectedUrl(data.annotated_image_url);
+      setResult(formatResult(count, place, "api"));
+    } catch {
+      try {
+        setResult("Live API is unavailable. Running vehicle detection in your browser…");
+        const local = await detectVehiclesInBrowser(file);
+        setDetectedUrl(local.annotated_image_url);
+        setResult(formatResult(local.vehicle_count, place, "browser", local.by_class));
+      } catch (err) {
+        setResult("❌ Error: " + formatError(err));
       }
-      const count = data.vehicle_count;
-      const annotatedUrl = data.annotated_image_url as string | undefined;
-      let text = "✅ YOLOv8 Detection Complete\n\n";
-      if (count !== undefined) text += `Detected vehicles: ${count}\n`;
-      if (place) {
-        text += `Location: ${place.name} (${place.area}) · road R${place.edge_index}\n`;
-      }
-      if (annotatedUrl) {
-        setDetectedUrl(annotatedUrl);
-        text += "\nShowing annotated image on the right.";
-      }
-      setResult(text);
-    } catch (err) {
-      setResult("❌ Error: " + formatError(err));
     } finally {
       setBusy(false);
     }
@@ -69,6 +100,9 @@ export function DetectStudio() {
       <h2 className="mt-2 text-[28px] font-light tracking-[-0.02em]">
         Upload image for detection
       </h2>
+      <p className="mt-3 max-w-2xl text-[15px] text-stone">
+        If the hosted detector is offline, this page runs an on-device model in your browser.
+      </p>
       <div className="mt-8">
         <PlacePair
           start={place}
@@ -116,7 +150,7 @@ export function DetectStudio() {
         )}
         {detectedUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img id="previewDetected" src={detectedUrl} alt="YOLO annotated" className="preview-img w-full rounded-[10px]" />
+          <img id="previewDetected" src={detectedUrl} alt="Detected vehicles" className="preview-img w-full rounded-[10px]" />
         )}
       </div>
     </div>

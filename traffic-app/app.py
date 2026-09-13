@@ -56,7 +56,9 @@ def _yolo_enabled():
     env = os.environ.get("ENABLE_YOLO")
     if env is not None:
         return env.lower() not in ("0", "false", "off")
-    return not os.environ.get("RENDER")
+    # Try to load whenever ultralytics is installed. Slim hosts without
+    # the package fail fast; the Detect page then runs on-device in-browser.
+    return True
 
 
 yolo_model = None

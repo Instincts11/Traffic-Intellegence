@@ -97,7 +97,7 @@ export default function DetectPage() {
         items={[
           {
             q: "YOLO failed to load?",
-            a: "Weights may be missing on a slim host. Forecasts and maps still work. Check /api/health for yolo: true/false.",
+            a: "If the hosted API is asleep or YOLO is off, Detect runs an on-device vehicle detector in your browser and still draws boxes plus a count.",
           },
           {
             q: "Can I point this at live CCTV?",
