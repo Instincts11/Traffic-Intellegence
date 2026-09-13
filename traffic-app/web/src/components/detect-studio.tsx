@@ -1,28 +1,18 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { fetchJson } from "@/lib/api";
 import { detectVehiclesInBrowser } from "@/lib/detect-browser";
 import { formatError } from "@/lib/format-error";
 import { PlacePair } from "@/components/place-pair";
 import type { Place } from "@/lib/places";
 
-type YoloResponse = {
-  error?: string;
-  vehicle_count?: number;
-  annotated_image_url?: string;
-};
-
 function formatResult(
   count: number,
   place: Place | null,
-  source: "api" | "browser",
   byClass?: Record<string, number>,
 ) {
   const lines = [
-    source === "api"
-      ? "✅ YOLOv8 Detection Complete"
-      : "✅ Vehicle detection complete (on-device)",
+    "✅ YOLOv8n detection complete",
     "",
     `Detected vehicles: ${count}`,
   ];
@@ -69,26 +59,13 @@ export function DetectStudio() {
     }
     setBusy(true);
     setDetectedUrl("");
-    setResult("Uploading image and running vehicle detection…");
+    setResult("Loading YOLOv8n in your browser and detecting vehicles…");
     try {
-      const formData = new FormData();
-      formData.append("image", file);
-      const data = await fetchJson<YoloResponse>("/api/yolo_detect", {
-        method: "POST",
-        body: formData,
-      }, 20000);
-      const count = Number(data.vehicle_count || 0);
-      if (data.annotated_image_url) setDetectedUrl(data.annotated_image_url);
-      setResult(formatResult(count, place, "api"));
-    } catch {
-      try {
-        setResult("Live API is unavailable. Running vehicle detection in your browser…");
-        const local = await detectVehiclesInBrowser(file);
-        setDetectedUrl(local.annotated_image_url);
-        setResult(formatResult(local.vehicle_count, place, "browser", local.by_class));
-      } catch (err) {
-        setResult("❌ Error: " + formatError(err));
-      }
+      const local = await detectVehiclesInBrowser(file);
+      setDetectedUrl(local.annotated_image_url);
+      setResult(formatResult(local.vehicle_count, place, local.by_class));
+    } catch (err) {
+      setResult("❌ Error: " + formatError(err));
     } finally {
       setBusy(false);
     }
@@ -96,12 +73,12 @@ export function DetectStudio() {
 
   return (
     <div className="rounded-[10px] bg-surface p-6 md:p-8">
-      <p className="eyebrow">YOLOv8</p>
+      <p className="eyebrow">YOLOv8n</p>
       <h2 className="mt-2 text-[28px] font-light tracking-[-0.02em]">
         Upload image for detection
       </h2>
       <p className="mt-3 max-w-2xl text-[15px] text-stone">
-        If the hosted detector is offline, this page runs an on-device model in your browser.
+        Detection runs on-device in your browser with YOLOv8n, so it works even when the hosted API is offline.
       </p>
       <div className="mt-8">
         <PlacePair

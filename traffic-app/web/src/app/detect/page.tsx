@@ -55,8 +55,8 @@ export default function DetectPage() {
             <h3>From box to feature</h3>
             <p>
               Counts are meant to align with the same idea as 5-minute traffic
-              bins: how busy is this view. If YOLO is offline on a slim host, the
-              API should say so; maps and forecasts can still run without it.
+              bins: how busy is this view. Detection runs YOLOv8n in the browser,
+              so a sleeping API does not block counts.
             </p>
             <h2>What this is not</h2>
             <p>
@@ -97,7 +97,7 @@ export default function DetectPage() {
         items={[
           {
             q: "YOLO failed to load?",
-            a: "If the hosted API is asleep or YOLO is off, Detect runs an on-device vehicle detector in your browser and still draws boxes plus a count.",
+            a: "Detect loads YOLOv8n in your browser. The first run downloads the model; after that, counts and boxes stay on-device even if the hosted API is down.",
           },
           {
             q: "Can I point this at live CCTV?",
