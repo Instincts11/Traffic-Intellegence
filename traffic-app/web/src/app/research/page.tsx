@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/page-hero";
 import { Prose } from "@/components/prose";
 import { Eyebrow } from "@/components/eyebrow";
-import { ContentBand, PageFaq } from "@/components/page-content";
+import { ContentBand, NumberedBand, PageFaq, QuoteBand, SplitEssay, StatStrip } from "@/components/page-content";
 
 export const metadata: Metadata = {
   title: "Research",
@@ -154,9 +154,110 @@ export default function ResearchPage() {
               Map (see a route) → Influence (see links) → Detect (optional camera).
               That order matches how the loop was designed.
             </p>
+            <h2>What the table is allowed to mean</h2>
+            <p>
+              MAE is how many km/h you miss on average. RMSE punishes the ugly
+              misses. R² asks whether the series was learnable at all. None of
+              those numbers is a bus clearing East Fort. That is why PPO’s
+              travel-time range sits in the dark band above this essay — a
+              different unit, on purpose.
+            </p>
+            <h3>Splits and causality</h3>
+            <p>
+              Windows are causal. Features are normalized with statistics that
+              cannot see the test week. GAT attention is computed on the true
+              adjacency, not a fully connected fantasy. If a paper fully connects
+              the capital, it has not met a city.
+            </p>
+            <h3>The public site vs the lab</h3>
+            <p>
+              Interactive Predict/Map/Influence use a deterministic demo predictor
+              so a browser without a GPU can still rehearse the hour. Cite this
+              page for trained-model metrics. Cite the studios for OSM geometry
+              and scenario behavior. Saying both sentences is how research
+              survives a product demo.
+            </p>
           </Prose>
         </div>
       </section>
+
+      <StatStrip
+        items={[
+          { v: "0.5354", l: "LSTM MAE" },
+          { v: "0.9766", l: "LSTM R²" },
+          { v: "1.3447", l: "Hybrid MAE" },
+          { v: "0.9309", l: "Hybrid R²" },
+        ]}
+      />
+
+      <SplitEssay
+        eyebrow="Two grades"
+        title="The lab grades residuals. The city grades minutes."
+        left={
+          <>
+            <p>
+              We refuse to hide LSTM’s prettier fit to advertise the hybrid. A
+              univariate student can win a table and lose a corridor. Print both
+              rows. If procurement has one cell, put the routing delta in it.
+            </p>
+            <p>
+              RMSE 0.7880 versus 2.0056 is the spatial tax made loud. The hybrid
+              spends capacity on neighbors. That tax is the point of GAT.
+            </p>
+          </>
+        }
+        right={
+          <>
+            <p>
+              PPO’s 10–25% travel-time cut versus Dijkstra is the field grade.
+              Dynamic routes, redistributed load, a policy instead of a photograph.
+              Distance-only Dijkstra still wins if kilometres are the only KPI.
+            </p>
+            <p>
+              Future work is a queue, not a promise: live APIs, multi-camera
+              fusion, signal policies, Jetson-class edge, fuel as a second reward,
+              multimodal legs.
+            </p>
+          </>
+        }
+      />
+
+      <NumberedBand
+        tone="parchment"
+        eyebrow="Cite without embarrassment"
+        title="Six sentences that survive a reviewer."
+        steps={[
+          {
+            t: "Name the graph",
+            d: "OSMnx-derived Thiruvananthapuram drive graph — not a synthetic grid, not all of Kerala.",
+          },
+          {
+            t: "Name the cadence",
+            d: "Five-minute bins of speed, flow, congestion, weather, density.",
+          },
+          {
+            t: "Print both models",
+            d: "LSTM and hybrid LSTM–GAT with MAE, RMSE, R² on the research split.",
+          },
+          {
+            t: "Print the policy",
+            d: "PPO vs Dijkstra travel-time range, setting named, unit = minutes.",
+          },
+          {
+            t: "Label the website",
+            d: "Interactive speeds are scenario demos on OSM unless you re-ran weights.",
+          },
+          {
+            t: "State the limits",
+            d: "No world-best MAE. No city-wide CCTV. No replacement for signal timing or transit.",
+          },
+        ]}
+      />
+
+      <QuoteBand
+        quote="A city does not grade you on mean absolute error. It grades you on whether a bus clears East Fort before the school bell."
+        attrib="Research · Traffic"
+      />
 
       <ContentBand
         eyebrow="How to cite these results"
@@ -204,6 +305,18 @@ export default function ResearchPage() {
           {
             q: "What is the unit of success?",
             a: "Minutes saved on a corridor people actually drive — not only a prettier residual plot.",
+          },
+          {
+            q: "Can I quote demo km/h as the table?",
+            a: "No. Demo speeds are a studio instrument. The table is the trained split. Say both.",
+          },
+          {
+            q: "Is 10–25% a guarantee?",
+            a: "It is the evaluated range versus Dijkstra in the research setting. Distance-only trips can still prefer shortest path.",
+          },
+          {
+            q: "Why Thiruvananthapuram as the case?",
+            a: "Capital pulse, coastal approach, hills, IT outflow, two-wheeler mix — a stress test dressed as a city.",
           },
         ]}
       />

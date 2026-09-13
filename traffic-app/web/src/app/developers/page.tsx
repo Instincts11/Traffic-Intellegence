@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/page-hero";
 import { Prose } from "@/components/prose";
 import { Eyebrow } from "@/components/eyebrow";
-import { ContentBand, PageFaq } from "@/components/page-content";
+import { ContentBand, NumberedBand, PageFaq, QuoteBand, SplitEssay, StatStrip } from "@/components/page-content";
 
 export const metadata: Metadata = {
   title: "Developers",
@@ -29,7 +29,7 @@ const endpoints = [
   {
     method: "POST",
     path: "/api/yolo_detect",
-    note: "multipart image posted to Flask YOLOv8. Returns vehicle_count and annotated_image_url under /static/uploads.",
+    note: "multipart image posted to Flask YOLOv8 when weights exist. Public Detect uses in-browser YOLOv8n instead — do not depend on this for the UI.",
   },
   {
     method: "GET",
@@ -144,9 +144,121 @@ export default function DevelopersPage() {
               same outputs. Heavier hybrid weights can be wired later; do not
               document demo speeds as live Kerala traffic.
             </p>
+            <h2>Fetch like a datasheet, not like a tutorial GIF</h2>
+            <p>
+              Next proxies <strong>/api/*</strong> to Flask. If the sidecar
+              returns HTML 502/503, <strong>fetchJson</strong> on the client
+              refuses to parse it as JSON. Predict and Map then use the
+              deterministic demo field. Influence can mint a default window.
+              Detect never needed that proxy for boxes — ONNX lives in
+              <strong>public/models/yolov8n.onnx</strong>.
+            </p>
+            <h3>Places</h3>
+            <p>
+              Empty query returns no dump. Debounce in the UI. Nominatim plus
+              cached Overpass catalog. If the network is rude, a curated TVM
+              list still lets Palayam exist. Do not json() HTML from
+              <strong>/api/places</strong>.
+            </p>
+            <h3>What to log. What never to log.</h3>
+            <p>
+              Log scenario, timestamp, start/end place names, route_mode. Do not
+              log uploaded frames longer than civic policy. Do not hang raw
+              weights on the public internet. The contact form is a brief, not a
+              backdoor.
+            </p>
+            <h2>Errors we want you to see</h2>
+            <p>
+              If YOLO is dark on Flask, the API should say 503 with a sentence.
+              If a corridor is unknown, return the list. If PPO is untrained for
+              a subgraph, fall back to Dijkstra and label the fallback. Silent
+              success is how cities lose months.
+            </p>
           </Prose>
         </div>
       </section>
+
+      <StatStrip
+        tone="dark"
+        items={[
+          { v: "Next 16", l: "Instrument face" },
+          { v: "Flask", l: "Scientific runtime" },
+          { v: "/api/*", l: "Proxy contract" },
+          { v: "ONNX", l: "Browser YOLO" },
+        ]}
+      />
+
+      <SplitEssay
+        eyebrow="Two processes"
+        title="Love both, or fork neither."
+        left={
+          <>
+            <p>
+              Flask owns edges, demo prediction, PPO indices, Folium, optional
+              Ultralytics. Next owns parchment, App Router, Three.js islands,
+              Metadata, the studios. The UI calls <strong>/api/*</strong>. Next
+              proxies to port 5000.
+            </p>
+            <p>
+              Production on Render may run a slim Flask without YOLO. The public
+              Detect page does not care. Do not document 503 HTML as a JSON
+              contract.
+            </p>
+          </>
+        }
+        right={
+          <>
+            <p>
+              Theme tokens live in Tailwind v4 <strong>@theme</strong>: bone,
+              parchment, khaki, mist, ash, stone, graphite, obsidian, ember,
+              vapor. Space Grotesk at 300. IBM Plex Mono for serials. Client
+              islands only where the instrument must move.
+            </p>
+            <p>
+              City tenancy wants a gateway. Open CORS is for local demos. Keys
+              are a conversation on Contact, not a header you scrape from this
+              page.
+            </p>
+          </>
+        }
+      />
+
+      <NumberedBand
+        tone="parchment"
+        eyebrow="Minimum viable city"
+        title="From clone to a corridor you can screenshot."
+        steps={[
+          {
+            t: "Install",
+            d: "Python deps in traffic-app. npm install in web. Optional ultralytics only if you insist on Flask YOLO.",
+          },
+          {
+            t: "Boot Flask",
+            d: "python app.py — health should name Thiruvananthapuram and an edge count.",
+          },
+          {
+            t: "Boot Next",
+            d: "npm run dev. Open /predict. If Flask sleeps, demo fallback still paints places.",
+          },
+          {
+            t: "Hit map",
+            d: "POST /api/route_map_full with lat/lon, scenario rain, route_mode fastest.",
+          },
+          {
+            t: "Hit influence",
+            d: "GET /api/influence?lat=&lon=&place=Palayam — 30×30 plus road_details.",
+          },
+          {
+            t: "Detect without Flask",
+            d: "Open /detect, upload a still. Model is /models/yolov8n.onnx in public.",
+          },
+        ]}
+      />
+
+      <QuoteBand
+        quote="Silent success is how cities lose months. If YOLO is dark, say 503. If PPO is untrained, label the Dijkstra fallback."
+        attrib="Developers · Traffic"
+      />
 
       <section className="bg-[#1f1f1b] text-[#f3f3ee]">
         <div className="mx-auto max-w-[1200px] px-5 py-16 md:px-8">
@@ -193,6 +305,18 @@ export default function DevelopersPage() {
             t: "Refresh OSM catalog",
             d: "GET /api/places/catalog?refresh=true rebuilds data/tvm_osm_places.json from Overpass when online.",
           },
+          {
+            t: "Do not parse HTML",
+            d: "502/503 from Render is an HTML page. Treat non-JSON as failure and use demo fallback.",
+          },
+          {
+            t: "ONNX path",
+            d: "web/public/models/yolov8n.onnx — first Detect visit downloads it; later visits are local.",
+          },
+          {
+            t: "Theme tokens",
+            d: "bone, parchment, khaki, ash, stone, graphite, obsidian, ember. One orange. No extra chrome.",
+          },
         ]}
       />
 
@@ -201,7 +325,7 @@ export default function DevelopersPage() {
         items={[
           {
             q: "UI works but maps are empty?",
-            a: "Flask is probably down. Next proxies /api to port 5000 — both processes must run.",
+            a: "Flask is probably down. Next proxies /api to port 5000 — both processes must run for full GeoJSON. Demo fallback still covers Predict speeds.",
           },
           {
             q: "Places search empty?",
@@ -210,6 +334,14 @@ export default function DevelopersPage() {
           {
             q: "CORS?",
             a: "Flask adds open CORS for local demos. Put a gateway in front for production.",
+          },
+          {
+            q: "Why does /api/yolo_detect 503?",
+            a: "Slim hosts skip Ultralytics. The public Detect page uses in-browser YOLOv8n and does not need that route.",
+          },
+          {
+            q: "Is generate_demo_predictions the research model?",
+            a: "No. Same inputs, same outputs, OSM edge count. Cite Research for MAE/R². Cite this function for the public studio.",
           },
         ]}
       />

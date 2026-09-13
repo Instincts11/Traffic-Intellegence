@@ -3,7 +3,7 @@ import { PageHero } from "@/components/page-hero";
 import { MapStudio } from "@/components/map-studio";
 import { Prose } from "@/components/prose";
 import { Eyebrow } from "@/components/eyebrow";
-import { ContentBand, PageFaq } from "@/components/page-content";
+import { ContentBand, NumberedBand, PageFaq, QuoteBand, SplitEssay, StatStrip } from "@/components/page-content";
 
 export const metadata: Metadata = {
   title: "Map",
@@ -17,7 +17,7 @@ export default function MapPage() {
       <PageHero
         kicker="Map"
         title="The graph, drawn as a city."
-        lede="Pick start and end places in Thiruvananthapuram, choose a scenario, then generate. You get the full city speed map plus a clear route view between your two places."
+        lede="Pick start and end places in Thiruvananthapuram, choose a scenario, then generate. Full-city speed colors, a grey crow-flies line, and shortest / fastest / balanced routes — minutes as the grade, kilometres as the alibi. Jam lives here. Coupling lives on Influence."
         primary={{ href: "/predict", label: "Run prediction first" }}
         secondary={{ href: "/influence", label: "Open influence" }}
       />
@@ -72,9 +72,129 @@ export default function MapPage() {
               Kowdiar → Medical College · Kazhakkoottam → Pattom. Compare shortest
               vs fastest under rain to see why time and distance disagree.
             </p>
+            <h2>How to brief a map without lying</h2>
+            <p>
+              The full-city view is a sampled major-road canvas so the browser
+              stays a notebook, not a GIS workstation. The route view is the
+              argument: three policies on the same OSM geometry. Cards under the
+              map report kilometres and estimated minutes. Minutes are the grade.
+              Kilometres are the alibi.
+            </p>
+            <h3>Pins, grey line, dashed alternatives</h3>
+            <p>
+              Green START and black END are snapped places. The grey dashed line
+              is Euclidean honesty — useful when someone claims “it’s only four
+              kilometres.” Driving is never that line. Blue shortest, ember
+              fastest, green balanced: three answers to three different questions.
+              Mixing them in a sentence is how demos go soft.
+            </p>
+            <h3>Color discipline</h3>
+            <p>
+              On Map, color is predicted speed. On Influence, color is coupling.
+              On Detect, color is vehicle class. If a jury asks “why is this road
+              orange,” the answer is always which page they are on. We spent ember
+              as a scarce highlighter. Do not spend it as wallpaper.
+            </p>
+            <h2>Thiruvananthapuram pairs that teach</h2>
+            <p>
+              <strong>Airport → Secretariat</strong> is rain and NH rumor.{" "}
+              <strong>East Fort → Ulloor</strong> is market braid into hospital
+              time. <strong>Kazhakkoottam → Pattom</strong> is the IT outflow.{" "}
+              <strong>Kowdiar → Medical College</strong> is residential calm that
+              inherits a jam late. Run each under normal and rain. Write down
+              whether fastest and shortest still agree. Disagreement is the demo.
+            </p>
+            <h3>Performance, on purpose</h3>
+            <p>
+              Sampling major highways on the city canvas is not a missing-data
+              scandal. The route polylines still follow the edges that matter for
+              your trip. If you need every alley, you want a GIS export, not a
+              public instrument.
+            </p>
           </Prose>
         </div>
       </section>
+
+      <StatStrip
+        items={[
+          { v: "Green", l: "≥ 25 km/h predicted" },
+          { v: "Orange", l: "18–25 km/h" },
+          { v: "Red", l: "Congested forecast" },
+          { v: "Blue", l: "Fastest edge on view" },
+        ]}
+      />
+
+      <SplitEssay
+        eyebrow="Three questions, three paths"
+        title="Shortest is geometry. Fastest is the hour. Balanced is diplomacy."
+        tone="parchment"
+        left={
+          <>
+            <p>
+              A short road can be a trap. East Fort’s braid looks efficient until
+              rain writes a queue onto the only narrow approach. Fastest uses the
+              predicted speed field — the same demo hour Predict produced — so
+              the path is allowed to detour in kilometres to save minutes.
+            </p>
+            <p>
+              Balanced exists because operators hate heroic U-turns as much as
+              they hate sitting still. It is the policy that can survive a
+              committee that contains both a GIS analyst and a bus driver.
+            </p>
+          </>
+        }
+        right={
+          <>
+            <p>
+              Generate once under normal, once under rain, once under accident.
+              If the fastest path never moves, the scenario knob is decoration.
+              If it moves and the grey line stays put, you have taught the
+              difference between distance and time.
+            </p>
+            <p>
+              Do not need Predict first — Map can mint a demo forecast — but
+              sharing the same timestamp and scenario is how the three pages
+              stay one rehearsal.
+            </p>
+          </>
+        }
+      />
+
+      <NumberedBand
+        eyebrow="Generate ritual"
+        title="Five steps, then argue about minutes."
+        steps={[
+          {
+            t: "Search start",
+            d: "East Fort, Palayam, Airport — wait for OSM dropdown. Pins lie if you skip search.",
+          },
+          {
+            t: "Search end",
+            d: "Secretariat, Technopark, Medical College. Two named places, one clock.",
+          },
+          {
+            t: "Pick a scenario",
+            d: "Rain is the honest monsoon. Accident is the shock. Heavy is 18:00.",
+          },
+          {
+            t: "Choose a primary style",
+            d: "Fastest for time, shortest for distance, balanced when both stakeholders are in the room.",
+          },
+          {
+            t: "Read the cards",
+            d: "km and minutes for each alternative. Then open Influence on one pin to see coupling.",
+          },
+          {
+            t: "Say the sentence",
+            d: "“Predicted demo speeds on real OSM roads.” Then sit down.",
+          },
+        ]}
+      />
+
+      <QuoteBand
+        quote="The grey line is the lie everyone believes. The ember path is the hour the city actually offers."
+        attrib="Map studio · Thiruvananthapuram"
+      />
 
       <ContentBand
         eyebrow="Map glossary"
@@ -105,6 +225,18 @@ export default function MapPage() {
             t: "Scenario",
             d: "Knob such as rain or accident that regenerates speeds before routing.",
           },
+          {
+            t: "City canvas",
+            d: "Sampled major roads so the notebook stays fast. Not every alley is inked.",
+          },
+          {
+            t: "Route view",
+            d: "Edges along your trip plus dashed alternatives. This is the argument.",
+          },
+          {
+            t: "Minutes vs km",
+            d: "Cards report both. Quote minutes when the question is arrival. Quote km when the question is geometry.",
+          },
         ]}
       />
 
@@ -126,6 +258,14 @@ export default function MapPage() {
           {
             q: "Do I need Predict first?",
             a: "Helpful but not required. Map can generate a demo forecast for the scenario you pick if none is stored yet.",
+          },
+          {
+            q: "Is orange on Map the same as orange on Influence?",
+            a: "No. Map orange is slower predicted speed. Influence orange is stronger coupling. Mixing legends is the most common demo error.",
+          },
+          {
+            q: "Are these live GPS probes?",
+            a: "No. Speeds are scenario forecasts. Geometry is OSM. Repeat the inputs; the colors should match.",
           },
         ]}
       />

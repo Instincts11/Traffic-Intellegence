@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/page-hero";
 import { Prose } from "@/components/prose";
 import { Eyebrow } from "@/components/eyebrow";
-import { ContentBand, PageFaq } from "@/components/page-content";
+import { ContentBand, NumberedBand, PageFaq, QuoteBand, SplitEssay, StatStrip } from "@/components/page-content";
 
 export const metadata: Metadata = {
   title: "Technology",
@@ -27,7 +27,7 @@ const stack = [
     id: "yolo",
     name: "YOLOv8",
     role: "Density from pixels",
-    body: "Loop detectors lie by omission. A camera does not. YOLOv8n detects bicycle, car, motorcycle, bus, truck. Counts become a feature, not a screenshot. On slim hosts the detector can sleep; the rest of the stack does not wait for it.",
+    body: "Loop detectors lie by omission. A camera does not. On this site, YOLOv8n runs in the browser (ONNX, one 640 letterbox pass) and labels car, truck, bike, and bus. Counts are a feature, not a screenshot. On slim hosts Flask YOLO can sleep; Detect does not wait for it.",
   },
   {
     id: "ppo",
@@ -128,14 +128,114 @@ export default function TechnologyPage() {
             <p>
               Predict and Map consume demo edge speeds + OSM geometry + place
               search (Nominatim / Overpass catalog). Influence builds a local
-              attention-style matrix from those speeds near a place. Detect calls
-              YOLOv8 when weights are present. Network is a Three.js teaching
+              attention-style matrix from those speeds near a place. Detect runs
+              YOLOv8n in the browser. Network is a Three.js teaching
               graph. Keeping the stack named this way stops “AI traffic” from
               becoming a single vague button.
+            </p>
+            <h2>On-device vision, hosted graph</h2>
+            <p>
+              Detect no longer waits on Flask YOLO. ONNX Runtime Web letterboxes
+              the still to 640 and classifies car, truck, bike, bus on your
+              machine. The graph, places, and demo speeds still prefer the
+              scientific runtime when it is awake, and fall back when a host
+              returns HTML instead of JSON. Technology that cannot survive a
+              sleeping sidecar is a slide.
+            </p>
+            <h3>Why 5-minute bins</h3>
+            <p>
+              Finer is vanity without sensors. Coarser is policy. Five minutes is
+              the heartbeat that matches how a capital actually changes a queue
+              without pretending we have a loop detector on every stem.
+            </p>
+            <h3>Why a real OSM graph</h3>
+            <p>
+              Synthetic grids have four neighbors and no Fort market. Palayam has
+              pulse. The coast lies about capacity. Hills hide inheritance. If
+              attention cannot survive that, it does not deserve a product page.
             </p>
           </Prose>
         </div>
       </section>
+
+      <StatStrip
+        items={[
+          { v: "LSTM", l: "Temporal memory" },
+          { v: "GAT", l: "Spatial attention" },
+          { v: "YOLOv8n", l: "On-device density" },
+          { v: "PPO", l: "Time-seeking policy" },
+        ]}
+      />
+
+      <SplitEssay
+        eyebrow="Error vs route"
+        title="We print the louder MAE because routing needs the quieter truth."
+        left={
+          <>
+            <p>
+              Standalone LSTM: MAE 0.5354, RMSE 0.7880, R² 0.9766. A strong
+              univariable singer. It can hug a series until the residual is tiny
+              and the path is still stupid.
+            </p>
+            <p>
+              Hybrid LSTM–GAT: MAE 1.3447, R² 0.9309. Numerically louder error,
+              spatially better cartography. The Ember CTA is the routing number,
+              not the prettier residual.
+            </p>
+          </>
+        }
+        right={
+          <>
+            <p>
+              PPO versus Dijkstra: 10–25% less experienced travel time in the
+              evaluated setting. The clip in PPO is the adult in the room —
+              updates stay proximal so a noisy afternoon cannot unteach a month.
+            </p>
+            <p>
+              Demo speeds on the public site are not those weights. They are the
+              interactive face of the loop. Cite Research when you need the
+              table. Cite Predict when you need a corridor someone can click.
+            </p>
+          </>
+        }
+      />
+
+      <NumberedBand
+        tone="parchment"
+        eyebrow="Closed loop"
+        title="Acquire, clean, predict, act — then argue."
+        steps={[
+          {
+            t: "Acquire",
+            d: "OSMnx extracts Thiruvananthapuram. Drive graph, weather, density, 5-minute stride.",
+          },
+          {
+            t: "Clean",
+            d: "Interpolate, sync, normalize, map nodes to graph indices. No silent NaNs into the LSTM.",
+          },
+          {
+            t: "Remember",
+            d: "LSTM reads the last hour as a sentence. Monday is not Friday. Rain is not a holiday.",
+          },
+          {
+            t: "Attend",
+            d: "GAT refuses the fiction that an edge is alone. Congestion becomes a rumor with a source.",
+          },
+          {
+            t: "See",
+            d: "YOLOv8n counts the still. Optional. The loop still routes in the dark.",
+          },
+          {
+            t: "Act",
+            d: "PPO reads living weights. Folium and Three.js both tell the truth, in different dialects.",
+          },
+        ]}
+      />
+
+      <QuoteBand
+        quote="Nothing in this stack is a secret sauce. The sauce is the closed loop and the refusal to ship a predictor that cannot move a vehicle."
+        attrib="Technology · Traffic"
+      />
 
       <section className="bg-[#1f1f1b] text-[#f3f3ee]">
         <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-8">
@@ -188,6 +288,18 @@ export default function TechnologyPage() {
             t: "Demo predictor",
             d: "Lightweight speed field used in this deployment so demos run without a GPU.",
           },
+          {
+            t: "Letterbox 640",
+            d: "Single full-image YOLO pass. No tiled zooms, no invented duplicate boxes.",
+          },
+          {
+            t: "Class-aware NMS",
+            d: "A bike is not suppressed by a overlapping car unless overlap is extreme. Labels stay distinct.",
+          },
+          {
+            t: "Sidecar fallback",
+            d: "If Flask returns HTML 502/503, the UI refuses to parse it as JSON and uses the demo field.",
+          },
         ]}
       />
 
@@ -205,6 +317,14 @@ export default function TechnologyPage() {
           {
             q: "Where is code?",
             a: "Flask scientific runtime and Next.js UI both live under traffic-app. Developers page lists the HTTP surface.",
+          },
+          {
+            q: "Does Detect need Ultralytics on the server?",
+            a: "Not for the public page. Browser YOLOv8n is enough. Flask YOLO remains optional for lab hosts that install weights.",
+          },
+          {
+            q: "Why can hybrid MAE be worse?",
+            a: "Spatial models spend capacity on neighbors. Univariate fit can look better while routes stay naive. We publish both numbers.",
           },
         ]}
       />

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/page-hero";
 import { Prose } from "@/components/prose";
 import { Eyebrow } from "@/components/eyebrow";
-import { ContentBand, PageFaq } from "@/components/page-content";
+import { ContentBand, NumberedBand, PageFaq, QuoteBand, SplitEssay, StatStrip } from "@/components/page-content";
 
 export const metadata: Metadata = {
   title: "Product",
@@ -131,9 +131,115 @@ export default function ProductPage() {
               We ship parchment and obsidian as first-class variants. The orange
               does not become a theme. It remains a highlighter.
             </p>
+            <h2>What “award-worthy” means here</h2>
+            <p>
+              Not a carnival of charts. A closed loop you can finish in a
+              sitting: forecast, map, coupling, optional camera. Named models.
+              Printed residuals. Ember only on the thing you press. A capital
+              city instead of a toy grid. Honesty about demo speeds so a design
+              jury and a traffic engineer can sit in the same row.
+            </p>
+            <h3>Surfaces share one hour</h3>
+            <p>
+              Predict writes it. Map paints it. Influence explains who is
+              coupled. Detect checks a still. Network teaches the metaphor.
+              Research prints the scores. Technology names the stack. Product is
+              the table of contents for that hour — not a separate app with a
+              different personality.
+            </p>
+            <h3>Who should not buy this story</h3>
+            <p>
+              Teams who want live Google-clone tiles tomorrow. Teams who want
+              number-plate policing. Teams who need a 40-color heatmap to feel
+              sophisticated. Start with OSM, one failing clock, and a corridor
+              you can name. Everything else is a later chapter.
+            </p>
           </Prose>
         </div>
       </section>
+
+      <StatStrip
+        tone="dark"
+        items={[
+          { v: "4", l: "Instruments" },
+          { v: "1", l: "Closed loop" },
+          { v: "TVM", l: "Shipped case" },
+          { v: "OSM", l: "Civic geometry" },
+        ]}
+      />
+
+      <SplitEssay
+        eyebrow="Loop, not dashboard"
+        title="See. Remember. Attend. Move."
+        left={
+          <>
+            <p>
+              Consumer navigation notices the jam in the windshield. Traffic
+              writes the hour before, then grades itself on whether a vehicle
+              arrives. That is why PPO sits in the same product as LSTM and GAT
+              instead of in a footnote.
+            </p>
+            <p>
+              Detection is optional density. Routing still works in the dark.
+              Cameras are a courtesy when poles exist — never a hostage taking
+              of the rest of the notebook.
+            </p>
+          </>
+        }
+        right={
+          <>
+            <p>
+              Operators get a corridor and a clock. Researchers get error tables
+              and a graph that is not a citation. Developers get REST and
+              GeoJSON. Designers get parchment, graphite, one ember. If a
+              sentence cannot survive all four, it does not ship.
+            </p>
+            <p>
+              The original Flask service remains the scientific runtime. This
+              Next.js surface is the public instrument panel. Splitting them
+              into separate stories is how numbers go soft.
+            </p>
+          </>
+        }
+      />
+
+      <NumberedBand
+        tone="parchment"
+        eyebrow="Pilot shape"
+        title="A corridor, not a metropolitan ocean."
+        body="First quarter discipline. Cities that skip this become slideware."
+        steps={[
+          {
+            t: "Name the failing clock",
+            d: "Airport → Secretariat at 09:00 in rain. One sentence. No vision deck.",
+          },
+          {
+            t: "Confirm OSM coverage",
+            d: "The TVM drive graph already ships. Other cities earn portability after this one works.",
+          },
+          {
+            t: "Choose scenario knobs",
+            d: "Rain, accident, heavy, clear. Policy language, not decoration.",
+          },
+          {
+            t: "Pick a default policy",
+            d: "Fastest for arrival, shortest for geometry, balanced for mixed rooms.",
+          },
+          {
+            t: "Optional camera",
+            d: "Privacy and retention first. Then Detect as density, not as policing.",
+          },
+          {
+            t: "Label the data",
+            d: "Demo forecast vs live feed, on every slide, or the pilot is fiction.",
+          },
+        ]}
+      />
+
+      <QuoteBand
+        quote="We borrowed laboratory quiet from the places that ship silicon, not from the marketing sites that ship gradients."
+        attrib="Product · Traffic"
+      />
 
       <section className="bg-[#2d2f33] text-[#f3f3ee]">
         <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-8">
@@ -209,6 +315,14 @@ export default function ProductPage() {
           {
             q: "Where do I click first?",
             a: "Product explains modules; Predict is the working studio; Developers is the contract.",
+          },
+          {
+            q: "Why parchment instead of a dark dashboard?",
+            a: "Because the hour should be readable. Graphite is for proof. Ember is for action. A carnival is not a lab.",
+          },
+          {
+            q: "Does Detect change Map?",
+            a: "Not automatically. Counts are a density instrument. Map uses scenario speeds unless you wire them together on purpose.",
           },
         ]}
       />

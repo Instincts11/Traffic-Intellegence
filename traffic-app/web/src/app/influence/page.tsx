@@ -3,7 +3,7 @@ import { PageHero } from "@/components/page-hero";
 import { InfluenceStudio } from "@/components/influence-studio";
 import { Prose } from "@/components/prose";
 import { Eyebrow } from "@/components/eyebrow";
-import { ContentBand, PageFaq } from "@/components/page-content";
+import { ContentBand, NumberedBand, PageFaq, QuoteBand, SplitEssay, StatStrip } from "@/components/page-content";
 
 export const metadata: Metadata = {
   title: "Influence",
@@ -17,7 +17,7 @@ export default function InfluencePage() {
       <PageHero
         kicker="Influence"
         title="Which roads affect each other."
-        lede="Pick a place in Thiruvananthapuram. The heat map shows which nearby roads are strongly linked in the speed model. Deeper orange = stronger link — not more jam."
+        lede="Pick a place in Thiruvananthapuram. About thirty nearby roads become a heat map of coupling. Deeper orange is a louder vote — not more jam. Map is speed. This page is rumor with a source you can point at."
         primary={{ href: "/predict", label: "Predict first" }}
         secondary={{ href: "/map", label: "Open map" }}
       />
@@ -81,9 +81,118 @@ export default function InfluencePage() {
               visible for one neighborhood at a time, so operators and students
               can see who is coupled to whom before they look at a route.
             </p>
+            <h2>Attention, without the mysticism</h2>
+            <p>
+              GAT attention is a vote. Each road asks its neighbors how much of
+              their present should become its future. This page is that vote as a
+              spreadsheet you can point at. Deep orange is a loud vote. Pale is a
+              neighbor who is topologically present but electorally quiet.
+            </p>
+            <h3>Thirty roads, not the whole capital</h3>
+            <p>
+              A city-scale attention tensor is not a public instrument. We clip
+              to about thirty nearest OSM edges so a human can finish a sentence
+              about Palayam without a PhD in heat maps. The R-index suffix exists
+              because several edges share a place name. Uniqueness is courtesy.
+            </p>
+            <h3>Self-links and diagonals</h3>
+            <p>
+              Top-left after the labels is often a road affecting itself. That is
+              not a bug. Memory of one’s own last speed is allowed. The
+              interesting cells are the off-diagonal rumors: Connemara writing
+              Palayam, a feeder writing a flyover, an industrial capillary
+              inheriting the highway twelve minutes late.
+            </p>
+            <h2>How to brief Influence</h2>
+            <p>
+              “This is not jam. Map is jam. This is who is coupled near this
+              place under the same demo hour.” If someone still says “why is
+              everything orange,” they skipped the legend. Sit with them on one
+              cell until the number means a sentence.
+            </p>
           </Prose>
         </div>
       </section>
+
+      <StatStrip
+        items={[
+          { v: "~30×30", l: "Local road matrix" },
+          { v: "Deeper orange", l: "Stronger coupling" },
+          { v: "Not jam", l: "Jam lives on Map" },
+          { v: "R-index", l: "Edges near one place" },
+        ]}
+      />
+
+      <SplitEssay
+        eyebrow="Two legends"
+        title="If you remember one rule, remember this."
+        tone="parchment"
+        left={
+          <>
+            <p>
+              <strong>Map</strong> paints predicted speed: green free, orange
+              tightening, red held. That is the hour as a city.
+            </p>
+            <p>
+              <strong>Influence</strong> paints connection strength between
+              nearby roads. A pale cell can sit on a very jammed road. A deep
+              cell can sit on a quiet feeder that merely writes the future of a
+              louder one.
+            </p>
+          </>
+        }
+        right={
+          <>
+            <p>
+              Load Palayam, then East Fort, then Technopark. Neighborhoods have
+              different coupling textures. Fort is a braid. Technopark is an
+              outflow. Palayam is pulse. If all three matrices look identical,
+              the focus failed.
+            </p>
+            <p>
+              Speeds in the list under the grid are the same demo field as
+              Predict. Coupling is derived from that field locally — a teaching
+              attention, not a raw exported GAT tensor from a GPU run.
+            </p>
+          </>
+        }
+      />
+
+      <NumberedBand
+        eyebrow="Read one neighborhood"
+        title="From search box to a single cell you can defend."
+        steps={[
+          {
+            t: "Search a place",
+            d: "Palayam, Kowdiar, Medical College. Dropdown after a few characters.",
+          },
+          {
+            t: "Load heat map",
+            d: "Wait for the grid. Read the guide box before you argue color.",
+          },
+          {
+            t: "Find a deep cell",
+            d: "Row is affected. Column is influencer. Say both names out loud.",
+          },
+          {
+            t: "Check the list",
+            d: "Place, highway type, distance, predicted km/h — so the matrix has geography.",
+          },
+          {
+            t: "Open Map",
+            d: "Same place as a pin. Confirm you have not confused coupling with speed.",
+          },
+          {
+            t: "Change scenario",
+            d: "If Predict was rain, reload Influence in that hour. The neighborhood should still be that neighborhood.",
+          },
+        ]}
+      />
+
+      <QuoteBand
+        quote="Congestion is a rumor with a source. Influence is how we print the source instead of shouting at the whole map."
+        attrib="Influence studio · GAT as a spreadsheet"
+      />
 
       <ContentBand
         eyebrow="Worked example"
@@ -115,6 +224,18 @@ export default function InfluencePage() {
             t: "List under the grid",
             d: "Shows place, highway type, distance from focus, and predicted km/h for each road in the matrix.",
           },
+          {
+            t: "Self link",
+            d: "A road may affect itself. That is memory, not vanity. Hunt the off-diagonals for rumor.",
+          },
+          {
+            t: "Neighborhood texture",
+            d: "Fort braid, Palayam pulse, Technopark outflow — matrices should not be identical.",
+          },
+          {
+            t: "Demo hour",
+            d: "Same date/time/scenario as Predict when you share a window. Otherwise a default demo set is minted.",
+          },
         ]}
       />
 
@@ -136,6 +257,14 @@ export default function InfluencePage() {
           {
             q: "Same speeds as Map?",
             a: "Yes when you share the last prediction window. Otherwise Influence builds a default demo forecast first.",
+          },
+          {
+            q: "Is this the raw GAT tensor?",
+            a: "It is an attention-style local matrix for teaching and ops briefing. Research GAT lives in the training loop. Do not cite a cell as a published coefficient unless you exported weights.",
+          },
+          {
+            q: "Why only ~30 roads?",
+            a: "A human can finish a sentence about thirty neighbors. A capital-scale tensor is a lab artifact, not a public page.",
           },
         ]}
       />

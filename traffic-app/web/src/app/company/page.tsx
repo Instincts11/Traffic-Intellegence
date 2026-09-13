@@ -3,7 +3,7 @@ import { PageHero } from "@/components/page-hero";
 import { Prose } from "@/components/prose";
 import { Eyebrow } from "@/components/eyebrow";
 import { Button } from "@/components/button";
-import { ContentBand, PageFaq } from "@/components/page-content";
+import { ContentBand, NumberedBand, PageFaq, QuoteBand, SplitEssay, StatStrip } from "@/components/page-content";
 
 export const metadata: Metadata = {
   title: "Company",
@@ -116,12 +116,112 @@ export default function CompanyPage() {
               label that on purpose so students and operators do not confuse a lab
               with a municipal CCTV wall.
             </p>
+            <h2>Taste, as a hiring filter</h2>
+            <p>
+              We hire for residuals and type. If you have only one, teach the
+              other here. A sentence that cannot survive an operator, a
+              researcher, and an engineer does not go on the site. A model that
+              cannot change a path does not go in the loop.
+            </p>
+            <h3>What we will not become</h3>
+            <p>
+              A marketplace for rides. A paint job on Dijkstra. A neon dashboard
+              that needs a legend to apologize. A detector that issues fines. A
+              company that hides LSTM’s prettier MAE to advertise the hybrid.
+            </p>
+            <h3>Craft, named</h3>
+            <p>
+              Bone and parchment for reading. Graphite bands for proof. Ember
+              reserved for the thing you press. IBM Plex Mono for serial numbers.
+              No drop shadows. Variants — parchment and obsidian — instead of a
+              carnival of themes. If it would not hang in a quiet studio, it
+              does not ship.
+            </p>
           </Prose>
           <div className="mt-12">
             <Button href="/contact">Start a conversation</Button>
           </div>
         </div>
       </section>
+
+      <StatStrip
+        items={[
+          { v: "TVM", l: "The graph" },
+          { v: "SF craft", l: "The standard" },
+          { v: "4 models", l: "One desk" },
+          { v: "1 orange", l: "Ember only" },
+        ]}
+      />
+
+      <SplitEssay
+        eyebrow="Two cities, one notebook"
+        title="Kerala is the dataset. Quiet type is the discipline."
+        left={
+          <>
+            <p>
+              Thiruvananthapuram is not a backdrop. The flyover that lies, the
+              industrial road that does not, the school-run at Palayam, the
+              Technopark outflow — that is the work. Portability is earned after
+              this capital graph works, not before.
+            </p>
+            <p>
+              We exist because reactive maps are a polite way to be late. The
+              hour before, plus a policy that does something besides a red
+              polyline, is the company.
+            </p>
+          </>
+        }
+        right={
+          <>
+            <p>
+              San Francisco here is a standard of craft, not a relocation rumor.
+              Parchment, not sterile white. Space Grotesk at 300, not a shout.
+              If it would not hang in a South Park studio, it does not ship.
+            </p>
+            <p>
+              Labs still run Flask, PyTorch, OSMnx, Folium. The public face runs
+              Next.js 16. Both directories live under traffic-app because
+              splitting the story from the experiment is how numbers go soft.
+            </p>
+          </>
+        }
+      />
+
+      <NumberedBand
+        eyebrow="How we review"
+        title="If it cannot survive three chairs, it does not ship."
+        steps={[
+          {
+            t: "Operator chair",
+            d: "Can a corridor owner use this at 09:00 without a legend apology?",
+          },
+          {
+            t: "Research chair",
+            d: "Are both errors printed? Is the graph real? Is the split causal?",
+          },
+          {
+            t: "Engineering chair",
+            d: "Does a sleeping sidecar become HTML parsed as JSON, or a labeled fallback?",
+          },
+          {
+            t: "Design chair",
+            d: "Is ember only on actions? Is vapor sitting down? Is the type 300?",
+          },
+          {
+            t: "Ethics chair",
+            d: "Is Detect density, not a fine? Are frames retained only as policy allows?",
+          },
+          {
+            t: "Honesty chair",
+            d: "Does every demo say OSM geometry + scenario speeds, out loud?",
+          },
+        ]}
+      />
+
+      <QuoteBand
+        quote="Reactive maps are a polite way to be late. We wanted the hour before — and a policy that does something with it besides a red polyline."
+        attrib="Company · Traffic"
+      />
 
       <ContentBand
         eyebrow="Principles"
@@ -152,6 +252,14 @@ export default function CompanyPage() {
             t: "Route is the grade",
             d: "If a forecast cannot change a path, it is a chart — not infrastructure.",
           },
+          {
+            t: "Three chairs",
+            d: "Operator, researcher, engineer in the same review. One missing chair is how slogans ship.",
+          },
+          {
+            t: "Capital first",
+            d: "Other OSM cities are a later chapter. Thiruvananthapuram is the case that must remain hard.",
+          },
         ]}
       />
 
@@ -169,6 +277,14 @@ export default function CompanyPage() {
           {
             q: "How do we start?",
             a: "Use the site, then Contact with one failing clock and whether you have cameras or only OSM.",
+          },
+          {
+            q: "Do you hide the LSTM score?",
+            a: "Never. Hybrid MAE is louder. LSTM R² is prettier. Both print. Routing is the grade.",
+          },
+          {
+            q: "Is Detect policing?",
+            a: "No. Density for a still you chose. No plates as a product. Privacy is part of the conversation.",
           },
         ]}
       />

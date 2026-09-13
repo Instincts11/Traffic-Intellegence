@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import { Button } from "@/components/button";
 import { Eyebrow } from "@/components/eyebrow";
 import { HeroCanvas } from "@/components/hero-canvas";
-import { ContentBand, PageFaq } from "@/components/page-content";
+import {
+  ContentBand,
+  NumberedBand,
+  PageFaq,
+  QuoteBand,
+  SplitEssay,
+} from "@/components/page-content";
 import { stats } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -87,6 +93,27 @@ export default function HomePage() {
             ask of mobility, the more prediction it takes. And prediction is
             becoming the bottleneck. Traffic was built for this.
           </p>
+          <div className="mt-16 grid gap-8 border-t border-[#3a3a34] pt-12 md:grid-cols-3">
+            {[
+              [
+                "Memory",
+                "A Thursday is not a Monday. The school-run at Palayam is a sentence the city writes every term. Without temporal memory, routing is gossip dressed as GPS.",
+              ],
+              [
+                "Neighborhood",
+                "A jam at East Fort is not a private event. It writes Kowdiar twelve minutes later. Attention is how rumor becomes a coefficient instead of a surprise.",
+              ],
+              [
+                "Consequence",
+                "A forecast that cannot move a vehicle is a chart. PPO exists so the next hour is not only visible — it is walkable, driveable, and timed.",
+              ],
+            ].map(([t, d]) => (
+              <article key={t}>
+                <h3 className="text-[22px] font-light tracking-[-0.02em]">{t}</h3>
+                <p className="mt-3 text-[15px] leading-relaxed text-[#b8b8ae]">{d}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -192,23 +219,50 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-bone">
-        <div className="mx-auto max-w-[800px] px-5 py-16 md:px-8">
-          <Eyebrow>About the speeds</Eyebrow>
-          <h2 className="mt-4 text-[32px] font-light tracking-[-0.02em]">
-            Not live Google traffic — demo forecasts you can trust to repeat.
-          </h2>
-          <p className="mt-5 text-[16px] leading-relaxed text-stone">
-            Speeds on Predict, Map, and Influence come from a deterministic demo
-            predictor: same date, time, and scenario always produce the same road
-            speeds. Rain and rush hour make corridors slower on purpose. The road
-            layout and place names come from real OpenStreetMap data for
-            Thiruvananthapuram. YOLO detection on uploaded photos is live for that
-            image. Together, the site is a working lab for the capital’s graph —
-            not a live CCTV feed of every junction.
-          </p>
-        </div>
-      </section>
+      <SplitEssay
+        eyebrow="Honesty as infrastructure"
+        title="Two truths on the same parchment: a real city, a labeled forecast."
+        tone="parchment"
+        left={
+          <>
+            <p>
+              Speeds on Predict, Map, and Influence come from a deterministic demo
+              predictor. Same date, time, and scenario always produce the same
+              road speeds. Rain and rush hour make corridors slower on purpose.
+              That is not a bug — it is how a jury, a student, and an operator
+              can rerun the hour without arguing about a probe that moved.
+            </p>
+            <p>
+              The road layout and place names come from real OpenStreetMap data
+              for Thiruvananthapuram: Palayam, MG Road, Kowdiar, Pattom, the
+              medical-college belt, Kazhakkoottam’s IT corridor, the coastal
+              approach to the airport. Geometry is civic. Speeds are a studio
+              instrument until a live feed is explicitly wired.
+            </p>
+          </>
+        }
+        right={
+          <>
+            <p>
+              Vehicle detection on Detect is different: YOLOv8n runs in the
+              browser on the photo you upload. Counts are live for that frame.
+              They are not a claim that every pole in Kerala is wired, and they
+              do not silently recolor the city map.
+            </p>
+            <p>
+              Research tables — LSTM R² 0.9766, hybrid MAE, PPO’s 10–25% travel-time
+              cut versus Dijkstra — belong to the trained loop. We print them on
+              Research. We do not pretend the public studio is that GPU session.
+              Cities forgive limits. They do not forgive silent fiction.
+            </p>
+          </>
+        }
+      />
+
+      <QuoteBand
+        quote="A city is a long experiment that should not surprise the people who live in it. The next hour is not a luxury. It is the minimum courtesy."
+        attrib="Traffic · design thesis"
+      />
 
       <section className="bg-[#2a2a25] text-[#f3f3ee]">
         <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-8 md:py-28">
@@ -267,6 +321,30 @@ export default function HomePage() {
         </div>
       </section>
 
+      <NumberedBand
+        eyebrow="First hour on the site"
+        title="Do not browse. Run the loop."
+        body="Four clicks is enough to see why Traffic is a closed system rather than a gallery of maps."
+        steps={[
+          {
+            t: "Predict a scenario",
+            d: "Set 09:00 rain. Read Palayam, Technopark, Medical College. Switch to clear. Watch the same places breathe.",
+          },
+          {
+            t: "Map the corridor",
+            d: "Airport → Secretariat, fastest vs shortest. The grey line is crow-flies. The ember path is time.",
+          },
+          {
+            t: "Load influence",
+            d: "Focus Palayam. Deep orange is coupling, not jam. Jam lives on Map as green / orange / red.",
+          },
+          {
+            t: "Count a frame",
+            d: "Upload a junction photo. Cars, trucks, and bikes are labeled on-device. Then return to the graph.",
+          },
+        ]}
+      />
+
       <ContentBand
         eyebrow="A morning in the capital"
         title="From Secretariat pulse to Technopark queue."
@@ -300,23 +378,73 @@ export default function HomePage() {
         ]}
       />
 
+      <section className="bg-bone">
+        <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-8">
+          <Eyebrow>The capital as a sentence</Eyebrow>
+          <h2 className="mt-4 max-w-4xl text-[36px] font-light tracking-[-0.03em] md:text-[48px]">
+            Thiruvananthapuram is not a grid. It is a pulse, a coast, a hill, and an IT outflow.
+          </h2>
+          <div className="mt-12 grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                t: "Secretariat & Palayam",
+                d: "Office pulse writes the morning. MG Road tightens because policy arrives by car and bus at the same minute. Forecasts that ignore clock are already late.",
+              },
+              {
+                t: "East Fort & Overbridge",
+                d: "Markets do not queue politely. A stall, a bus, a two-wheeler braid. Influence near Fort is how that braid becomes a neighborhood rather than a pin.",
+              },
+              {
+                t: "Kowdiar residences",
+                d: "Tree-lined, deceptively calm, then suddenly full. A jam inherited from Palayam arrives late and stays after the highway has forgotten.",
+              },
+              {
+                t: "Medical College / Ulloor",
+                d: "Hospitals do not pause for peak. Ambulance time is the only KPI that should embarrass a pretty residual plot.",
+              },
+              {
+                t: "Kazhakkoottam & Technopark",
+                d: "The evening outflow is a policy problem wearing an IT badge. Heavy scenario here is the honest demo of 18:00.",
+              },
+              {
+                t: "Airport coastal approach",
+                d: "NH pins the west. Rain turns capacity into rumor. Airport → Secretariat under accident is the corridor we ask visitors to run first.",
+              },
+            ].map((c) => (
+              <article key={c.t}>
+                <h3 className="text-[20px] font-light tracking-[-0.02em]">{c.t}</h3>
+                <p className="mt-3 text-[15px] leading-relaxed text-stone">{c.d}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <PageFaq
         items={[
           {
             q: "Is this live traffic?",
-            a: "Road layout and places are from OpenStreetMap. Speeds on Predict/Map/Influence are demo forecasts from date, time, and scenario. YOLO on Detect is live for the photo you upload.",
+            a: "Road layout and places are from OpenStreetMap. Speeds on Predict/Map/Influence are demo forecasts from date, time, and scenario. YOLO on Detect is live for the photo you upload — on-device, in the browser.",
           },
           {
             q: "Where should I start?",
-            a: "Predict a scenario, open Map with two places, then Influence near one of them. That three-step loop shows forecast → route → road links.",
+            a: "Predict a scenario, open Map with two places, then Influence near one of them. That three-step loop shows forecast → route → road links. Detect is the optional camera.",
           },
           {
             q: "Why Thiruvananthapuram?",
-            a: "It is a real capital graph with secretariat pulse, coastal approaches, hills, and an IT corridor — harder and more honest than a toy grid.",
+            a: "It is a real capital graph with secretariat pulse, coastal approaches, hills, and an IT corridor — harder and more honest than a toy grid. Kerala’s two-wheeler mix also forces the detector to tell car from truck from bike.",
           },
           {
             q: "What do the research numbers mean?",
-            a: "LSTM R² and PPO travel-time cuts are from the research track. The interactive site demonstrates the same loop with a lighter demo predictor so anyone can run it.",
+            a: "LSTM R² 0.9766 and PPO’s 10–25% travel-time cut versus Dijkstra are from the research track. The interactive site demonstrates the same loop with a lighter demo predictor so anyone can run it without a GPU.",
+          },
+          {
+            q: "Is detection running on the server?",
+            a: "No. Detect loads YOLOv8n (ONNX) in your browser. The hosted API may sleep; counts still happen on the image you chose.",
+          },
+          {
+            q: "Can I treat Map colors as Google traffic?",
+            a: "No. Green / orange / red are predicted demo speeds under a scenario. Repeat the same inputs and you get the same colors — that is the contract.",
           },
         ]}
       />
