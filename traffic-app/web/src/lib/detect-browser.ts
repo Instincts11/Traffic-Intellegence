@@ -1,5 +1,5 @@
 const INPUT_SIZE = 640;
-const CONF_THRES = 0.12;
+const CONF_THRES = 0.08;
 const IOU_THRES = 0.5;
 const ORT_VERSION = "1.21.0";
 const ORT_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
@@ -104,9 +104,15 @@ function sourceSize(src: HTMLImageElement | HTMLCanvasElement) {
   return { w: src.width, h: src.height };
 }
 
-function letterbox(img: HTMLImageElement | HTMLCanvasElement) {
+function letterbox(
+  img: HTMLImageElement | HTMLCanvasElement,
+  mode: "contain" | "cover" = "contain",
+) {
   const { w: iw, h: ih } = sourceSize(img);
-  const scale = Math.min(INPUT_SIZE / iw, INPUT_SIZE / ih);
+  const scale =
+    mode === "cover"
+      ? Math.max(INPUT_SIZE / iw, INPUT_SIZE / ih)
+      : Math.min(INPUT_SIZE / iw, INPUT_SIZE / ih);
   const nw = Math.round(iw * scale);
   const nh = Math.round(ih * scale);
   const dx = (INPUT_SIZE - nw) / 2;
@@ -187,15 +193,16 @@ function parseOutput(
 
   for (let i = 0; i < anchors; i++) {
     let best = 0;
-    let bestCls = 0;
-    for (let c = 0; c < numClasses; c++) {
+    let bestCls = 2;
+    for (const c of VEHICLE_CLASS_IDS) {
+      if (c >= numClasses) continue;
       const s = at(4 + c, i);
       if (s > best) {
         best = s;
         bestCls = c;
       }
     }
-    if (best < CONF_THRES || !VEHICLE_CLASS_IDS.has(bestCls)) continue;
+    if (best < CONF_THRES) continue;
 
     const cx = at(0, i);
     const cy = at(1, i);
@@ -227,56 +234,63 @@ function cropCanvas(
   y: number,
   w: number,
   h: number,
+  enhance = false,
 ) {
   const canvas = document.createElement("canvas");
   canvas.width = Math.max(1, Math.round(w));
   canvas.height = Math.max(1, Math.round(h));
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Could not crop the image.");
+  if (enhance) ctx.filter = "contrast(1.35) saturate(1.15) brightness(1.05)";
   ctx.drawImage(img, x, y, w, h, 0, 0, canvas.width, canvas.height);
   return canvas;
 }
 
 function detectionWindows(w: number, h: number) {
-  const windows = [{ x: 0, y: 0, w, h }];
-  const cw = Math.round(w * 0.6);
-  const ch = Math.round(h * 0.6);
+  const windows: { x: number; y: number; w: number; h: number; cover: boolean }[] = [
+    { x: 0, y: 0, w, h, cover: false },
+  ];
+  const cw = Math.round(w * 0.55);
+  const ch = Math.round(h * 0.55);
   for (const y of [0, h - ch]) {
     for (const x of [0, w - cw]) {
-      windows.push({ x, y, w: cw, h: ch });
+      windows.push({ x, y, w: cw, h: ch, cover: true });
     }
   }
-  windows.push({
-    x: Math.round(w * 0.15),
-    y: Math.round(h * 0.4),
-    w: Math.round(w * 0.7),
-    h: Math.round(h * 0.6),
-  });
+  windows.push(
+    { x: Math.round(w * 0.08), y: Math.round(h * 0.52), w: Math.round(w * 0.5), h: Math.round(h * 0.48), cover: true },
+    { x: Math.round(w * 0.18), y: Math.round(h * 0.58), w: Math.round(w * 0.42), h: Math.round(h * 0.42), cover: true },
+    { x: Math.round(w * 0.22), y: Math.round(h * 0.62), w: Math.round(w * 0.36), h: Math.round(h * 0.38), cover: true },
+  );
   return windows;
 }
 
 async function inferWindow(
   session: OrtSession,
   img: HTMLImageElement,
-  win: { x: number; y: number; w: number; h: number },
+  win: { x: number; y: number; w: number; h: number; cover: boolean },
 ) {
   const ort = window.ort;
   if (!ort) throw new Error("ONNX Runtime failed to load.");
-  const src =
+  const full =
     win.x === 0 && win.y === 0 && win.w === (img.naturalWidth || img.width) &&
-    win.h === (img.naturalHeight || img.height)
-      ? img
-      : cropCanvas(img, win.x, win.y, win.w, win.h);
-  const prepared = letterbox(src);
+    win.h === (img.naturalHeight || img.height);
+  const src = full ? img : cropCanvas(img, win.x, win.y, win.w, win.h, true);
+  const prepared = letterbox(src, win.cover ? "cover" : "contain");
   const input = new ort.Tensor("float32", prepared.float, [1, 3, INPUT_SIZE, INPUT_SIZE]);
   const feeds: Record<string, unknown> = {};
   feeds[session.inputNames[0] || "images"] = input;
   const out = await session.run(feeds);
   const hits = parseOutput(out[session.outputNames[0]], prepared);
-  return hits.map((hit) => ({
-    ...hit,
-    bbox: [hit.bbox[0] + win.x, hit.bbox[1] + win.y, hit.bbox[2], hit.bbox[3]] as Detection["bbox"],
-  }));
+  const iw = img.naturalWidth || img.width;
+  const ih = img.naturalHeight || img.height;
+  return hits.map((hit) => {
+    const x = Math.max(0, hit.bbox[0] + win.x);
+    const y = Math.max(0, hit.bbox[1] + win.y);
+    const w = Math.min(iw - x, hit.bbox[2]);
+    const h = Math.min(ih - y, hit.bbox[3]);
+    return { ...hit, bbox: [x, y, w, h] as Detection["bbox"] };
+  });
 }
 
 function drawDetections(img: HTMLImageElement, hits: Detection[]) {
