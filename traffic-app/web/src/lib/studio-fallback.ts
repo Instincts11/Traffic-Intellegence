@@ -1,6 +1,6 @@
 import { city } from "@/lib/city";
 import { generateDemoSpeeds, placeSpeedIndex } from "@/lib/demo-predict";
-import { fallbackNetwork, fallbackRouteMap } from "@/lib/demo-map";
+import { fallbackNetwork, fallbackRouteMapSync } from "@/lib/demo-map";
 import {
   TVM_PLACES,
   filterPlaces,
@@ -228,7 +228,7 @@ export function fallbackForApi(
     if (![startLat, startLon, endLat, endLon].every(Number.isFinite)) {
       return { error: "start_lat, start_lon, end_lat, and end_lon are required." };
     }
-    return fallbackRouteMap({
+    return fallbackRouteMapSync({
       startLat,
       startLon,
       endLat,

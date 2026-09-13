@@ -136,7 +136,7 @@ export function TrafficLeaflet({
         }
 
         const best = roads.find((r) => r.index === bestIndex);
-        if (best && best.coordinates.length > 1 && bestIndex !== -1) {
+        if (best && best.coordinates.length > 1 && bestIndex != null && bestIndex >= 0) {
           const tip =
             bestLabel || `Best road · ${Number(bestSpeed ?? 0).toFixed(2)} km/h`;
           L.polyline(best.coordinates, {

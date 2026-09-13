@@ -184,7 +184,7 @@ export function MapStudio() {
       const data = fallbackNetwork();
       setPayload((prev) => ({ ...prev, ...data, route: prev.route }));
       setStatus(
-        `✅ ${city.name} studio graph · ${data.edges ?? data.roads?.length ?? 0} corridors. Select start & end, then generate.`,
+        `✅ ${city.name} OSM basemap. Select start & end, then generate a driving route.`,
       );
     } catch (err) {
       setStatus("❌ Error: " + formatError(err));
@@ -197,8 +197,9 @@ export function MapStudio() {
       return;
     }
     setBusy(true);
+    setStatus("Routing on OpenStreetMap roads…");
     try {
-      const data = fallbackRouteMap({
+      const data = await fallbackRouteMap({
         startLat: start.lat,
         startLon: start.lon,
         endLat: end.lat,
@@ -234,7 +235,7 @@ export function MapStudio() {
 
 
 
-  const hasFull = (payload.roads?.length ?? 0) > 0;
+  const showCity = true;
 
   const route = payload.route;
 
@@ -473,7 +474,7 @@ export function MapStudio() {
 
 
 
-      {hasFull && (
+      {showCity && (
 
         <div className="mt-10">
 
@@ -481,19 +482,13 @@ export function MapStudio() {
 
           <h3 className="mt-1 text-[22px] font-light tracking-[-0.02em]">
 
-            All predicted speeds · {city.name}
+            {city.name} on OpenStreetMap
 
           </h3>
 
           <p className="mt-2 text-[14px] text-stone">
 
-            {payload.best_label || "City-wide view"} ·{" "}
-
-            {payload.best_speed != null
-
-              ? `${Number(payload.best_speed).toFixed(1)} km/h (blue highlight)`
-
-              : ""}
+            Green pin is start, black pin is end. After you generate, the colored line is the driving route on real roads — not a straight cut across the map. Grey dashed is crow-flies only.
 
           </p>
 
@@ -503,21 +498,19 @@ export function MapStudio() {
 
               mapKey="full-city"
 
-              roads={payload.roads || []}
+              roads={[]}
 
               center={payload.center || city.center}
 
               zoom={payload.zoom || city.zoom}
 
-              bestIndex={payload.best_index}
-
-              bestSpeed={payload.best_speed}
-
-              bestLabel={payload.best_label}
+              bestIndex={-1}
 
               markers={placeMarkers}
 
               routeLine={directLine}
+
+              pathOverlays={pathOverlays}
 
               height={480}
 
@@ -636,17 +629,13 @@ export function MapStudio() {
 
               mapKey={`route-${route.start_name}-${route.end_name}-${route.route_mode}`}
 
-              roads={route.roads ?? []}
+              roads={[]}
 
               center={route.center}
 
               zoom={route.zoom}
 
-              bestIndex={route.best_index}
-
-              bestSpeed={route.best_speed}
-
-              bestLabel={route.best_label}
+              bestIndex={-1}
 
               markers={placeMarkers}
 
@@ -666,9 +655,7 @@ export function MapStudio() {
 
           <p className="mt-3 text-[13px] text-stone">
 
-            Gray dashed = direct distance. Colored dashed = driving routes. Green marker =
-
-            start, black = end. Road colors follow predicted speed under the chosen scenario.
+            Gray dashed = straight-line distance. Blue dashed = shortest drive. Ember dashed = fastest drive. Green dashed = balanced. Pins sit on the places you picked.
 
           </p>
 
