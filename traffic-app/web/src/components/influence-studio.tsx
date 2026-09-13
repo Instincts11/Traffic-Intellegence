@@ -5,6 +5,7 @@ import { city } from "@/lib/city";
 import { formatError } from "@/lib/format-error";
 import { PlacePair } from "@/components/place-pair";
 import type { Place } from "@/lib/places";
+import { fallbackInfluence } from "@/lib/studio-fallback";
 
 type RoadDetail = {
   index: number;
@@ -31,18 +32,12 @@ export function InfluenceStudio() {
     setStatus("Fetching location-specific influence heat map…");
     setMatrix([]);
     try {
-      const params = new URLSearchParams();
-      if (place) {
-        params.set("lat", String(place.lat));
-        params.set("lon", String(place.lon));
-        params.set("edge", String(place.edge_index));
-        params.set("place", place.name);
-      }
-      const res = await fetch(`/api/influence?${params.toString()}`);
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        throw new Error(data.error || `HTTP ${res.status}`);
-      }
+      const data = fallbackInfluence({
+        lat: place?.lat,
+        lon: place?.lon,
+        edge: place?.edge_index,
+        place: place?.name,
+      });
       const nextRoads: string[] = data.roads || [];
       const nextMatrix: number[][] = data.matrix || [];
       const nextDetails: RoadDetail[] = data.road_details || [];

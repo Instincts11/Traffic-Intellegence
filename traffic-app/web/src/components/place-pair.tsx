@@ -102,7 +102,7 @@ function PlaceField({
           onFocus={() => {
             if (debouncedQuery.trim()) setOpen(true);
           }}
-          placeholder="Search OSM places — e.g. Palayam, Technopark…"
+          placeholder="Search places — e.g. Palayam, Sreekaryam, Technopark…"
           className="w-full rounded-[5px] border border-khaki bg-bone px-3 py-2.5 text-[15px]"
           autoComplete="off"
         />
@@ -120,12 +120,12 @@ function PlaceField({
         <ul className="relative z-30 mt-1 max-h-80 overflow-auto rounded-[5px] border border-khaki bg-parchment shadow-lg">
           <li className="sticky top-0 border-b border-khaki bg-bone px-3 py-2 font-mono text-[10px] tracking-[0.12em] uppercase text-ash">
             {searching
-              ? "Searching OpenStreetMap…"
-              : `${hits.length} OSM match${hits.length === 1 ? "" : "es"}`}
+              ? "Searching…"
+              : `${hits.length} match${hits.length === 1 ? "" : "es"}`}
           </li>
           {!searching && hits.length === 0 && (
             <li className="px-3 py-2.5 text-[13px] text-stone">
-              No OSM places match “{debouncedQuery.trim()}”
+              No places match “{debouncedQuery.trim()}”
             </li>
           )}
           {hits.map((p) => {
@@ -303,7 +303,7 @@ export function PlacePair({
       </div>
       <p className="mt-3 font-mono text-[12px] text-ash">
         {gpsStatus ||
-          "Type a place name. Results come from OpenStreetMap (Nominatim + Overpass), debounced while you type."}
+          "Type a place name. Results come from the Thiruvananthapuram catalog (Palayam, Sreekaryam, Technopark, …)."}
       </p>
     </div>
   );

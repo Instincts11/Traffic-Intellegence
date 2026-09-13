@@ -161,7 +161,7 @@ export const TVM_PLACES: Place[] = [
   { id: "sreekaryam-bypass", name: "Sreekaryam Bypass", area: "North", lat: 8.552, lon: 76.905, edge_index: 0 },
 ];
 
-function km(aLat: number, aLon: number, bLat: number, bLon: number) {
+export function haversineKm(aLat: number, aLon: number, bLat: number, bLon: number) {
   const dLat = ((bLat - aLat) * Math.PI) / 180;
   const dLon = ((bLon - aLon) * Math.PI) / 180;
   const x =
@@ -184,7 +184,7 @@ export function filterPlaces(
 
   let rows = TVM_PLACES.map((p) => ({
     ...p,
-    distance_km: origin ? km(origin.lat, origin.lon, p.lat, p.lon) : null,
+    distance_km: origin ? haversineKm(origin.lat, origin.lon, p.lat, p.lon) : null,
   }));
   rows = rows.filter(
     (p) =>
@@ -213,9 +213,9 @@ export function nearestListedPlace(origin: {
 }): Place | null {
   if (!TVM_PLACES.length) return null;
   let best = TVM_PLACES[0];
-  let bestKm = km(origin.lat, origin.lon, best.lat, best.lon);
+  let bestKm = haversineKm(origin.lat, origin.lon, best.lat, best.lon);
   for (const p of TVM_PLACES.slice(1)) {
-    const d = km(origin.lat, origin.lon, p.lat, p.lon);
+    const d = haversineKm(origin.lat, origin.lon, p.lat, p.lon);
     if (d < bestKm) {
       best = p;
       bestKm = d;
@@ -229,66 +229,13 @@ export async function searchPlacesOsm(
   origin?: { lat: number; lon: number } | null,
   limit = 25,
 ): Promise<Place[]> {
-  const q = query.trim();
-  if (!q) return [];
-  try {
-    const params = new URLSearchParams({
-      q,
-      limit: String(limit),
-    });
-    if (origin) {
-      params.set("lat", String(origin.lat));
-      params.set("lon", String(origin.lon));
-    }
-    const res = await fetch(`/api/places?${params.toString()}`);
-    const text = await res.text();
-    if (!res.ok || !text.trimStart().startsWith("{")) {
-      return filterPlaces(q, origin, limit);
-    }
-    const data = JSON.parse(text) as { error?: string; places?: Place[] };
-    if (data.error) {
-      return filterPlaces(q, origin, limit);
-    }
-    const rows = (data.places || []) as Place[];
-    return rows.map((p) => ({
-      id: p.id,
-      name: p.name,
-      area: p.area || "OSM",
-      lat: Number(p.lat),
-      lon: Number(p.lon),
-      edge_index: Number(p.edge_index ?? 0),
-      edge_id: p.edge_id ?? null,
-      distance_km: p.distance_km ?? null,
-      snap_km: p.snap_km ?? null,
-      source: p.source ?? "osm",
-    }));
-  } catch {
-    return filterPlaces(q, origin, limit);
-  }
+  return filterPlaces(query, origin, limit).map((p) => ({
+    ...p,
+    source: p.source || "studio",
+  }));
 }
 
 export async function snapPlace(place: Place): Promise<Place> {
-  try {
-    const params = new URLSearchParams({
-      lat: String(place.lat),
-      lon: String(place.lon),
-    });
-    const res = await fetch(`/api/nearest?${params.toString()}`);
-    const text = await res.text();
-    if (!res.ok || !text.trimStart().startsWith("{")) return place;
-    const data = JSON.parse(text) as { origin?: Place };
-    const origin = data.origin;
-    if (res.ok && origin) {
-      return {
-        ...place,
-        edge_index: origin.edge_index,
-        edge_id: origin.edge_id,
-        snap_km: origin.snap_km,
-      };
-    }
-  } catch {
-    /* Flask optional for listing; lat/lon still route */
-  }
   return place;
 }
 
