@@ -1,21 +1,11 @@
 const INPUT_SIZE = 640;
 const CONF_THRES = 0.4;
+const BIKE_CONF = 0.32;
 const IOU_THRES = 0.45;
 const CONTAIN_THRES = 0.45;
 const ORT_VERSION = "1.21.0";
 const ORT_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
 const MODEL_URL = "/models/yolov8n.onnx";
-
-const COCO_NAMES = [
-  "person",
-  "bicycle",
-  "car",
-  "motorcycle",
-  "airplane",
-  "bus",
-  "train",
-  "truck",
-];
 
 type Detection = {
   bbox: [number, number, number, number];
@@ -153,13 +143,12 @@ function nms(hits: Detection[]) {
   const sorted = [...hits].sort((a, b) => b.score - a.score);
   const keep: Detection[] = [];
   for (const hit of sorted) {
-    if (
-      keep.every(
-        (k) => iou(hit, k) < IOU_THRES && iomin(hit, k) < CONTAIN_THRES,
-      )
-    ) {
-      keep.push(hit);
-    }
+    const conflict = keep.some((k) => {
+      const same = k.class === hit.class;
+      if (same) return iou(hit, k) >= IOU_THRES || iomin(hit, k) >= CONTAIN_THRES;
+      return iou(hit, k) >= 0.78;
+    });
+    if (!conflict) keep.push(hit);
   }
   return keep;
 }
@@ -167,24 +156,36 @@ function nms(hits: Detection[]) {
 function pickVehicle(
   at: (ch: number) => number,
   numClasses: number,
-  minScore: number,
-): { cls: number; score: number } | null {
+): { label: "car" | "truck" | "bike" | "bus"; score: number } | null {
   const scoreOf = (id: number) => (id < numClasses ? at(4 + id) : 0);
-  const bicycle = scoreOf(1);
   const car = scoreOf(2);
-  const motorcycle = scoreOf(3);
-  const bus = scoreOf(5);
   const truck = scoreOf(7);
-  const fourWheel = Math.max(car, truck, bus);
+  const bus = scoreOf(5);
+  const bike = Math.max(scoreOf(1), scoreOf(3));
 
-  if (fourWheel >= minScore) {
-    if (bus >= 0.72 && bus >= car + 0.28) return { cls: 5, score: bus };
-    if (truck >= 0.78 && truck >= car + 0.3) return { cls: 7, score: truck };
-    return { cls: 2, score: fourWheel };
+  const ranked = [
+    { label: "car" as const, score: car },
+    { label: "truck" as const, score: truck },
+    { label: "bus" as const, score: bus },
+    { label: "bike" as const, score: bike },
+  ].sort((a, b) => b.score - a.score);
+
+  const best = ranked[0];
+  const second = ranked[1];
+  const minScore = best.label === "bike" ? BIKE_CONF : CONF_THRES;
+  if (best.score < minScore) return null;
+
+  if (
+    second &&
+    best.score < second.score + 0.08 &&
+    (best.label === "truck" || best.label === "bus") &&
+    second.label === "car" &&
+    second.score >= 0.35
+  ) {
+    return second;
   }
-  if (motorcycle >= Math.max(0.42, minScore)) return { cls: 3, score: motorcycle };
-  if (bicycle >= Math.max(0.42, minScore)) return { cls: 1, score: bicycle };
-  return null;
+
+  return best;
 }
 
 function parseOutput(
@@ -215,13 +216,13 @@ function parseOutput(
 
   const numClasses = channels - 4;
   const hits: Detection[] = [];
-  const minSide = Math.max(8, Math.min(meta.iw, meta.ih) * 0.03);
+  const minSide = Math.max(6, Math.min(meta.iw, meta.ih) * 0.012);
 
   const at = (ch: number, i: number) =>
     planar ? data[ch * anchors + i] : data[i * channels + ch];
 
   for (let i = 0; i < anchors; i++) {
-    const picked = pickVehicle((ch) => at(ch, i), numClasses, CONF_THRES);
+    const picked = pickVehicle((ch) => at(ch, i), numClasses);
     if (!picked) continue;
 
     const cx = at(0, i);
@@ -236,19 +237,31 @@ function parseOutput(
     const by = Math.max(0, Math.min(meta.ih, y1));
     const bw = Math.max(0, Math.min(meta.iw, x2) - bx);
     const bh = Math.max(0, Math.min(meta.ih, y2) - by);
-    if (bw < minSide || bh < minSide) continue;
-    const ratio = bw / bh;
-    if (ratio < 0.35 || ratio > 3.2) continue;
+    const need = picked.label === "bike" ? minSide * 0.7 : minSide;
+    if (bw < need || bh < need) continue;
+    const ratio = bw / Math.max(bh, 1);
+    if (picked.label === "bike") {
+      if (ratio < 0.2 || ratio > 4.5) continue;
+    } else if (ratio < 0.35 || ratio > 3.2) {
+      continue;
+    }
 
     hits.push({
       bbox: [bx, by, bw, bh],
-      class: COCO_NAMES[picked.cls] || "car",
+      class: picked.label,
       score: picked.score,
     });
   }
 
   return hits;
 }
+
+const CLASS_COLOR: Record<string, string> = {
+  car: "#f43e01",
+  truck: "#1d4ed8",
+  bike: "#ca8a04",
+  bus: "#7c3aed",
+};
 
 function drawDetections(img: HTMLImageElement, hits: Detection[]) {
   const canvas = document.createElement("canvas");
@@ -261,7 +274,8 @@ function drawDetections(img: HTMLImageElement, hits: Detection[]) {
   const font = Math.max(11, Math.round(canvas.width / 72));
   hits.forEach((hit) => {
     const [x, y, w, h] = hit.bbox;
-    ctx.strokeStyle = "#f43e01";
+    const color = CLASS_COLOR[hit.class] || "#f43e01";
+    ctx.strokeStyle = color;
     ctx.lineWidth = Math.max(2, canvas.width / 420);
     ctx.strokeRect(x, y, w, h);
 
@@ -271,7 +285,7 @@ function drawDetections(img: HTMLImageElement, hits: Detection[]) {
     const tw = ctx.measureText(label).width;
     const th = font + 4;
     const ly = Math.max(th, y);
-    ctx.fillStyle = "#f43e01";
+    ctx.fillStyle = color;
     ctx.fillRect(x, ly - th - pad, tw + pad * 2, th + pad);
     ctx.fillStyle = "#fff";
     ctx.fillText(label, x + pad, ly - pad - 2);

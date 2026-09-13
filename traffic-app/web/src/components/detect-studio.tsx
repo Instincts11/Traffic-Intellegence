@@ -78,7 +78,7 @@ export function DetectStudio() {
         Upload image for detection
       </h2>
       <p className="mt-3 max-w-2xl text-[15px] text-stone">
-        Detection runs on-device in your browser with YOLOv8n, so it works even when the hosted API is offline.
+        Detection runs on-device with YOLOv8n and labels each box as car, truck, or bike.
       </p>
       <div className="mt-8">
         <PlacePair
